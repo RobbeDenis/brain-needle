@@ -80,16 +80,55 @@ mod lexer_tests
 {
     use super::*;
 
+    // to enable print pass --nocapture
     #[test]
-    fn print_test()
+    fn print()
     {
         let file = "brainfuck_src\\hello.bf";
         let tokens = tokenize_file_from_path(file).expect("Failed to tokenize the file");
 
-        assert!(!tokens.is_empty(), "Token list should not be empty");
+        assert!(!tokens.is_empty(), "[Print Failed]\nToken list should not be empty");
 
+        println!("\n[Print]");
         for token in &tokens {
             print!("{:?} ", token);
+        }
+    }
+
+    #[test]
+    fn compare_expected()
+    {
+        use Token::*;
+        let file = "brainfuck_src\\hello.bf";
+
+        let expected_tokens: Vec<Token> = vec![                         // index
+            Add(10),    Loop,       Right(1),   Add(1),     Right(1),   // 4
+            Add(3),     Right(1),   Add(7),     Right(1),   Add(10),    // 9
+            Left(4),    Sub(1),     Back,       Right(3),   Add(2),     // 14
+            Out,        Right(1),   Add(1),     Out,        Add(7),     // 19
+            Out,        Out,        Add(3),     Out,        Left(2),    // 24
+            Add(2),     Out,        Right(1),   Add(15),    Out,        // 29
+            Right(1),   Out,        Add(3),     Out,        Sub(6),     // 34
+            Out,        Sub(8),     Out                                 // 37
+        ];
+
+        let tokens = tokenize_file_from_path(file).expect("Failed to tokenize the file");
+
+        assert!(
+            tokens.len() == expected_tokens.len(),
+            "[Compare Length Failed]\nExpected size: {}\nActual size:   {}", 
+            expected_tokens.len(), 
+            tokens.len()
+        );
+
+        for (i, token) in tokens.iter().enumerate() {
+            assert!(
+                token == &expected_tokens[i],
+                "[Compare Token Failed]\nToken mismatch at index {}\nExpected token: {:?}\nActual token:   {:?}", 
+                i,
+                &expected_tokens[i],
+                token
+            );
         }
     }
 }
