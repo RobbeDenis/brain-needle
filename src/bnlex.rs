@@ -6,7 +6,7 @@ use std::path::Path;
 use std::error::Error;
 use std::iter::Peekable;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token
 {
     Add     (u8),
@@ -75,6 +75,14 @@ where T: Iterator<Item = io::Result<u8>>
     return Ok(count);
 }
 
+
+
+
+/////////////////////////////////////////////////////////
+
+
+
+
 #[cfg(test)]
 mod lexer_tests 
 {
@@ -87,12 +95,13 @@ mod lexer_tests
         let file = "brainfuck_src\\hello.bf";
         let tokens = tokenize_file_from_path(file).expect("Failed to tokenize the file");
 
-        assert!(!tokens.is_empty(), "[Print Failed]\nToken list should not be empty");
+        assert!(!tokens.is_empty(), "[Print Failed]\nToken vector should not be empty");
 
         println!("\n[Print]");
         for token in &tokens {
             print!("{:?} ", token);
         }
+        println!();
     }
 
     #[test]
