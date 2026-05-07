@@ -53,3 +53,97 @@ pub fn create_flat_instr_tree_from_tokens(tokens: Vec<Token>) -> Result<Vec<Inst
 
     return Ok(instr_tree);
 }
+
+
+
+
+/////////////////////////////////////////////////////////
+
+
+
+
+#[cfg(test)]
+mod parser_tests 
+{
+    use super::*;
+
+    // to enable print pass --nocapture
+    #[test]
+    fn print()
+    {
+        use Token::*;
+
+        let tokens: Vec<Token> = vec![                                                       // index
+                Add(10),    Loop,       Right(1),   Add(1),     Right(1),   // 4
+                Add(3),     Right(1),   Add(7),     Right(1),   Add(10),    // 9
+                Left(4),    Sub(1),     Back,       Right(3),   Add(2),     // 14
+                Out,        Right(1),   Add(1),     Out,        Add(7),     // 19
+                Out,        Out,        Add(3),     Out,        Left(2),    // 24
+                Add(2),     Out,        Right(1),   Add(15),    Out,        // 29
+                Right(1),   Out,        Add(3),     Out,        Sub(6),     // 34
+                Out,        Sub(8),     Out                                 // 37
+            ];
+
+        let instr_tree = create_flat_instr_tree_from_tokens(tokens).unwrap();
+
+        assert!(!instr_tree.is_empty(), "[Print Failed]\nInstruction tree should not be empty");
+
+        println!("\n[Print Instr Tree]");
+        for node in &instr_tree {
+            print!("{:?} ", node);
+        }
+        println!();
+    }
+
+    #[test]
+    fn hello_world_from_file()
+    {
+        use Token::*;
+
+        let tokens: Vec<Token> = vec![                                  // index
+            Add(10),    Loop,       Right(1),   Add(1),     Right(1),   // 4
+            Add(3),     Right(1),   Add(7),     Right(1),   Add(10),    // 9
+            Left(4),    Sub(1),     Back,       Right(3),   Add(2),     // 14
+            Out,        Right(1),   Add(1),     Out,        Add(7),     // 19
+            Out,        Out,        Add(3),     Out,        Left(2),    // 24
+            Add(2),     Out,        Right(1),   Add(15),    Out,        // 29
+            Right(1),   Out,        Add(3),     Out,        Sub(6),     // 34
+            Out,        Sub(8),     Out                                 // 37
+        ];
+        
+        let tokens_clone = tokens.clone();
+
+        let instr_tree = create_flat_instr_tree_from_tokens(tokens).unwrap();
+
+        assert!(
+            tokens_clone.len() == instr_tree.len(),
+            "[Compare Length Failed]\nLength mismatch, instr tree length should be same as tokens\nTokens: {:?}\nInstr Tree:   {:?}", 
+            tokens_clone.len(),
+            instr_tree.len()
+        );
+
+        {   // scope for to prevent clash between InstrNode and Token (should just change the names)
+            use InstrNode::*;
+            let expected_instr_tree: Vec<InstrNode> = vec![                             // index
+                Add(10),    JumpIfZero(12), Right(1),           Add(1),     Right(1),   // 4
+                Add(3),     Right(1),       Add(7),             Right(1),   Add(10),    // 9
+                Left(4),    Sub(1),         JumpIfNotZero(1),   Right(3),   Add(2),     // 14
+                Out,        Right(1),       Add(1),             Out,        Add(7),     // 19
+                Out,        Out,            Add(3),             Out,        Left(2),    // 24
+                Add(2),     Out,            Right(1),           Add(15),    Out,        // 29
+                Right(1),   Out,            Add(3),             Out,        Sub(6),     // 34
+                Out,        Sub(8),         Out                                         // 37
+            ];
+
+            for (i, node) in instr_tree.iter().enumerate() {
+                assert!(
+                    node == &expected_instr_tree[i],
+                    "[Compare Node Failed]\nNode mismatch at index {}\nExpected node: {:?}\nActual node:   {:?}", 
+                    i,
+                    &expected_instr_tree[i],
+                    node
+                );
+            }
+        }
+    }
+}

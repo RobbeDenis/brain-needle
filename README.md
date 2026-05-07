@@ -8,6 +8,7 @@ The reason for making this project is to familiarise myself with rust.
         - returns tokens as `Vec<Token>`
     - get_amount_inseq_consume
         - collapses sequence of inc, dec and shifts into one token
-    - tests
-        - print
-        - compare_expected
+- Parsing to Flat AST [`src/bnparse.rs`](src/bnparse.rs)
+    - create_flat_instr_tree_from_tokens
+        - returns tree as `Vec<InstrNode>`
+        - uses a queue for jump instructions to ensure single pass parsing
