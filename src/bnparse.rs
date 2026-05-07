@@ -18,18 +18,37 @@ pub enum InstrNode
 pub fn create_flat_instr_tree_from_tokens(tokens: Vec<Token>) -> Result<Vec<InstrNode>, Box<dyn Error>>
 {
     let mut instr_tree: Vec<InstrNode> = Vec::new();
+    let mut loop_start_queue: Vec<usize> = Vec::new();
 
-    for token in tokens {
-        match token {
+    if tokens.len() > u16::MAX as usize {
+        return Err("program too large for 16-bit addressing".into());
+    }
+
+    for (i, token) in tokens.iter().enumerate() {
+        match *token {
             Token::Add(value) => instr_tree.push(InstrNode::Add(value)),
             Token::Sub(value) => instr_tree.push(InstrNode::Sub(value)),
             Token::Right(value) => instr_tree.push(InstrNode::Right(value)),
             Token::Left(value) => instr_tree.push(InstrNode::Left(value)),
-            Token::Loop => instr_tree.push(InstrNode::Out), // temp
-            Token::Back => instr_tree.push(InstrNode::Out), // temp
             Token::Out => instr_tree.push(InstrNode::Out),
-            Token::In => instr_tree.push(InstrNode::In)
+            Token::In => instr_tree.push(InstrNode::In),
+            Token::Loop => {
+                instr_tree.push(InstrNode::JumpIfZero(0));
+                loop_start_queue.push(i);
+            },
+            Token::Back => {
+                let start_idx = loop_start_queue.pop().ok_or(
+                    format!("loop token mismatch: found end \']\' without a matching start \'[\' at index {}", i)
+                )?;
+
+                instr_tree.push(InstrNode::JumpIfNotZero(start_idx as u16));
+                instr_tree[start_idx] = InstrNode::JumpIfZero(i as u16);
+            }
         }
+    }
+
+    if !loop_start_queue.is_empty() {
+        return Err(format!("loop token mismatch: {} start \'[\' without a matching end \']\'", loop_start_queue.len()).into());
     }
 
     return Ok(instr_tree);
