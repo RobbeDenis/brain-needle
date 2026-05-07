@@ -4,6 +4,7 @@ use std::path;
 use std::process;
 
 mod bnlex;
+mod bnparse;
 
 fn main() 
 {
@@ -19,8 +20,19 @@ fn main()
         process::exit(1);
     });
 
+    println!("\n[Tokens]");
     for token in &tokens {
         print!("{:?} ", token);
+    }
+
+    let flat_instr_tree = bnparse::create_flat_instr_tree_from_tokens(tokens).unwrap_or_else(|err| {
+        println!("Parsing error: {err}");
+        process::exit(1);
+    });
+
+    println!("\n\n[Flat Instruction Tree]");
+    for node in &flat_instr_tree {
+        print!("{:?} ", node);
     }
 }
 
