@@ -87,8 +87,8 @@ where T: Iterator<Item = io::Result<u8>>
 mod lexer_tests 
 {
     use super::*;
+    use crate::hello_world_tokens;
 
-    // to enable print pass --nocapture
     #[test]
     fn print()
     {
@@ -107,19 +107,8 @@ mod lexer_tests
     #[test]
     fn compare_expected()
     {
-        use Token::*;
         let file = "brainfuck_src\\hello.bf";
-
-        let expected_tokens: Vec<Token> = vec![                         // index
-            Add(10),    Loop,       Right(1),   Add(1),     Right(1),   // 4
-            Add(3),     Right(1),   Add(7),     Right(1),   Add(10),    // 9
-            Left(4),    Sub(1),     Back,       Right(3),   Add(2),     // 14
-            Out,        Right(1),   Add(1),     Out,        Add(7),     // 19
-            Out,        Out,        Add(3),     Out,        Left(2),    // 24
-            Add(2),     Out,        Right(1),   Add(15),    Out,        // 29
-            Right(1),   Out,        Add(3),     Out,        Sub(6),     // 34
-            Out,        Sub(8),     Out                                 // 37
-        ];
+        let expected_tokens: Vec<Token> = hello_world_tokens!();
 
         let tokens = tokenize_file_from_path(file).expect("Failed to tokenize the file");
 

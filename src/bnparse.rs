@@ -66,23 +66,13 @@ pub fn create_flat_instr_tree_from_tokens(tokens: Vec<Token>) -> Result<Vec<Inst
 mod parser_tests 
 {
     use super::*;
+    use crate::hello_world_tokens;
+    use crate::hello_world_instr_tree;
 
-    // to enable print pass --nocapture
     #[test]
     fn print()
     {
-        use Token::*;
-
-        let tokens: Vec<Token> = vec![                                                       // index
-                Add(10),    Loop,       Right(1),   Add(1),     Right(1),   // 4
-                Add(3),     Right(1),   Add(7),     Right(1),   Add(10),    // 9
-                Left(4),    Sub(1),     Back,       Right(3),   Add(2),     // 14
-                Out,        Right(1),   Add(1),     Out,        Add(7),     // 19
-                Out,        Out,        Add(3),     Out,        Left(2),    // 24
-                Add(2),     Out,        Right(1),   Add(15),    Out,        // 29
-                Right(1),   Out,        Add(3),     Out,        Sub(6),     // 34
-                Out,        Sub(8),     Out                                 // 37
-            ];
+        let tokens: Vec<Token> = hello_world_tokens!();
 
         let instr_tree = create_flat_instr_tree_from_tokens(tokens).unwrap();
 
@@ -96,20 +86,9 @@ mod parser_tests
     }
 
     #[test]
-    fn hello_world_from_file()
+    fn hello_world_from_tokens()
     {
-        use Token::*;
-
-        let tokens: Vec<Token> = vec![                                  // index
-            Add(10),    Loop,       Right(1),   Add(1),     Right(1),   // 4
-            Add(3),     Right(1),   Add(7),     Right(1),   Add(10),    // 9
-            Left(4),    Sub(1),     Back,       Right(3),   Add(2),     // 14
-            Out,        Right(1),   Add(1),     Out,        Add(7),     // 19
-            Out,        Out,        Add(3),     Out,        Left(2),    // 24
-            Add(2),     Out,        Right(1),   Add(15),    Out,        // 29
-            Right(1),   Out,        Add(3),     Out,        Sub(6),     // 34
-            Out,        Sub(8),     Out                                 // 37
-        ];
+        let tokens: Vec<Token> = hello_world_tokens!();
         
         let tokens_clone = tokens.clone();
 
@@ -122,28 +101,16 @@ mod parser_tests
             instr_tree.len()
         );
 
-        {   // scope for to prevent clash between InstrNode and Token (should just change the names)
-            use InstrNode::*;
-            let expected_instr_tree: Vec<InstrNode> = vec![                             // index
-                Add(10),    JumpIfZero(12), Right(1),           Add(1),     Right(1),   // 4
-                Add(3),     Right(1),       Add(7),             Right(1),   Add(10),    // 9
-                Left(4),    Sub(1),         JumpIfNotZero(1),   Right(3),   Add(2),     // 14
-                Out,        Right(1),       Add(1),             Out,        Add(7),     // 19
-                Out,        Out,            Add(3),             Out,        Left(2),    // 24
-                Add(2),     Out,            Right(1),           Add(15),    Out,        // 29
-                Right(1),   Out,            Add(3),             Out,        Sub(6),     // 34
-                Out,        Sub(8),         Out                                         // 37
-            ];
+        let expected_instr_tree: Vec<InstrNode> = hello_world_instr_tree!();
 
-            for (i, node) in instr_tree.iter().enumerate() {
-                assert!(
-                    node == &expected_instr_tree[i],
-                    "[Compare Node Failed]\nNode mismatch at index {}\nExpected node: {:?}\nActual node:   {:?}", 
-                    i,
-                    &expected_instr_tree[i],
-                    node
-                );
-            }
+        for (i, node) in instr_tree.iter().enumerate() {
+            assert!(
+                node == &expected_instr_tree[i],
+                "[Compare Node Failed]\nNode mismatch at index {}\nExpected node: {:?}\nActual node:   {:?}", 
+                i,
+                &expected_instr_tree[i],
+                node
+            );
         }
     }
 }

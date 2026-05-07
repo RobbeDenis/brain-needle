@@ -5,6 +5,7 @@ use std::process;
 
 mod bnlex;
 mod bnparse;
+mod testhelp;
 
 fn main() 
 {
