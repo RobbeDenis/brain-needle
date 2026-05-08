@@ -62,8 +62,7 @@ where T: Iterator<Item = io::Result<u8>>
     while let Some(Ok(byte)) = reader.peek() {
         if *byte == value {
             if count == u8::MAX {
-                let msg = format!("token count exceeded {} for {}", u8::MAX, value as char);
-                return Err(msg.into());
+                return Err(format!("token count exceeded {} for {}", u8::MAX, value as char).into());
             }
             count += 1;
             reader.next();
