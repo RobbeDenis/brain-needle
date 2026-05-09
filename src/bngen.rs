@@ -1,9 +1,10 @@
 
-use crate::bngen_ctx::*;
-use crate::bngen_emit::*;
-use crate::bnparse::InstrNode;
+// using
+use crate::bnparse::Node;
+use crate::bnctx::TargetContext;
+use crate::bnemit::BNEmitterFactory;
 
-pub fn generate_output(instr_tree: Vec<InstrNode>, target_ctx: TargetContext)
+pub fn generate_output(instr_tree: Vec<Node>, target_ctx: TargetContext)
 {
     let mut codegen = BNEmitterFactory::create(&target_ctx);
     
@@ -11,14 +12,14 @@ pub fn generate_output(instr_tree: Vec<InstrNode>, target_ctx: TargetContext)
     
     for node in &instr_tree {
         match  *node {
-            InstrNode::Add(__) | 
-            InstrNode::Sub(__) => codegen.emit_arithmetic(node),
-            InstrNode::Right(__) | 
-            InstrNode::Left(__) => codegen.emit_shift(node),
-            InstrNode::JumpIfZero(__) | 
-            InstrNode::JumpIfNotZero(__) => codegen.emit_jump(node),
-            InstrNode::Out => codegen.emit_out(),
-            InstrNode::In => codegen.emit_in()
+            Node::Add(__) | 
+            Node::Sub(__) => codegen.emit_arithmetic(node),
+            Node::Right(__) | 
+            Node::Left(__) => codegen.emit_shift(node),
+            Node::JumpIfZero(__) | 
+            Node::JumpIfNotZero(__) => codegen.emit_jump(node),
+            Node::Out => codegen.emit_out(),
+            Node::In => codegen.emit_in()
         }
     }
 

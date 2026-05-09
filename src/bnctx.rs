@@ -1,5 +1,6 @@
-use std::path::PathBuf;
 
+// using
+use std::path::PathBuf;
 
 #[allow(dead_code)]
 pub(crate) enum AsmFlavor
@@ -36,7 +37,7 @@ pub(crate) enum OutputFormat
     Assembly(AsmFlavor),
     Binary,
     Transpiled(Language),
-    
+    BFInterpret
 }
 
 #[allow(dead_code)]

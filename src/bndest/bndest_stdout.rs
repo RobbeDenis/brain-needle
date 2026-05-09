@@ -1,7 +1,7 @@
 
+// using
+use crate::bndest::BNDest;
 use std::io::Write;
-
-use crate::bngen_dest::BNEmitDest;
 
 pub struct StdoutDest
 {
@@ -16,7 +16,7 @@ impl StdoutDest
     }
 }
 
-impl BNEmitDest for StdoutDest
+impl BNDest for StdoutDest
 {
     fn push(&mut self, data: &str)
     {

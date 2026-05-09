@@ -1,9 +1,10 @@
 
-use std::error::Error;
+// using
 use crate::bnlex::Token;
+use std::error::Error;
 
 #[derive(Debug, PartialEq)]
-pub(crate) enum InstrNode
+pub enum Node
 {
     Add             (u8),   // value [0-255]
     Sub             (u8),
@@ -15,9 +16,9 @@ pub(crate) enum InstrNode
     In
 }
 
-pub fn create_flat_instr_tree_from_tokens(tokens: Vec<Token>) -> Result<Vec<InstrNode>, Box<dyn Error>>
+pub fn create_flat_instr_tree_from_tokens(tokens: Vec<Token>) -> Result<Vec<Node>, Box<dyn Error>>
 {
-    let mut instr_tree: Vec<InstrNode> = Vec::new();
+    let mut instr_tree: Vec<Node> = Vec::new();
     let mut loop_start_queue: Vec<usize> = Vec::new();
 
     if tokens.len() > u16::MAX as usize {
@@ -26,14 +27,14 @@ pub fn create_flat_instr_tree_from_tokens(tokens: Vec<Token>) -> Result<Vec<Inst
 
     for (i, token) in tokens.iter().enumerate() {
         match *token {
-            Token::Add(value) => instr_tree.push(InstrNode::Add(value)),
-            Token::Sub(value) => instr_tree.push(InstrNode::Sub(value)),
-            Token::Right(value) => instr_tree.push(InstrNode::Right(value)),
-            Token::Left(value) => instr_tree.push(InstrNode::Left(value)),
-            Token::Out => instr_tree.push(InstrNode::Out),
-            Token::In => instr_tree.push(InstrNode::In),
+            Token::Add(value) => instr_tree.push(Node::Add(value)),
+            Token::Sub(value) => instr_tree.push(Node::Sub(value)),
+            Token::Right(value) => instr_tree.push(Node::Right(value)),
+            Token::Left(value) => instr_tree.push(Node::Left(value)),
+            Token::Out => instr_tree.push(Node::Out),
+            Token::In => instr_tree.push(Node::In),
             Token::Loop => {
-                instr_tree.push(InstrNode::JumpIfZero(0));
+                instr_tree.push(Node::JumpIfZero(0));
                 loop_start_queue.push(i);
             },
             Token::Back => {
@@ -41,8 +42,8 @@ pub fn create_flat_instr_tree_from_tokens(tokens: Vec<Token>) -> Result<Vec<Inst
                     format!("loop token mismatch: found end \']\' without a matching start \'[\' at index {}", i)
                 )?;
 
-                instr_tree.push(InstrNode::JumpIfNotZero(start_idx as u16));
-                instr_tree[start_idx] = InstrNode::JumpIfZero(i as u16);
+                instr_tree.push(Node::JumpIfNotZero(start_idx as u16));
+                instr_tree[start_idx] = Node::JumpIfZero(i as u16);
             }
         }
     }
@@ -101,7 +102,7 @@ mod parser_tests
             instr_tree.len()
         );
 
-        let expected_instr_tree: Vec<InstrNode> = hello_world_instr_tree!();
+        let expected_instr_tree: Vec<Node> = hello_world_instr_tree!();
 
         for (i, node) in instr_tree.iter().enumerate() {
             assert!(

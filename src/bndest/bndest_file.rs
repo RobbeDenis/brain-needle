@@ -1,7 +1,8 @@
 
-use std::{fs::File, io::Write};
-
-use crate::bngen_dest::BNEmitDest;
+// using
+use crate::bndest::BNDest;
+use std::fs::File;
+use std::io::Write;
 
 pub struct FileDest
 {
@@ -16,7 +17,7 @@ impl FileDest
     }
 }
 
-impl BNEmitDest for FileDest
+impl BNDest for FileDest
 {
     fn push(&mut self, data: &str)
     {

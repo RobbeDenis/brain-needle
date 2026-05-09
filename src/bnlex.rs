@@ -1,8 +1,8 @@
 
+// using
 use std::fs::File;
 use std::io;
-use std::io::{BufReader, Read};
-use std::num::Wrapping;
+use std::io::Read;
 use std::path::Path;
 use std::error::Error;
 use std::iter::Peekable;
@@ -19,7 +19,7 @@ pub enum Token
     Out,
     In
 }
-
+ 
 const ADD: u8     = 43; // +
 const SUB: u8     = 45; // -
 const RIGHT: u8   = 62; // >
@@ -34,7 +34,7 @@ pub fn tokenize_file_from_path<T: AsRef<Path>>(path: T) -> Result<Vec<Token>, Bo
     let mut tokens: Vec<Token> = Vec::new();
 
     let file = File::open(path)?;
-    let mut reader = BufReader::new(file).bytes().peekable();
+    let mut reader = io::BufReader::new(file).bytes().peekable();
 
     while let Some(byte) = reader.next() {
         let value = byte?;

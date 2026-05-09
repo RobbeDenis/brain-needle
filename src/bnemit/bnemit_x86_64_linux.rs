@@ -1,19 +1,19 @@
 
-
-use crate::bngen_emit::BNEmitter;
-use crate::bnparse::InstrNode;
-use crate::bngen_dest::BNEmitDest;
+// using
+use crate::bnemit::BNEmitter;
+use crate::bndest::BNDest;
+use crate::bnparse::Node;
 
 pub struct X86X64LinuxEmitter // needs drop???
 {
-    dest: Box<dyn BNEmitDest>,
+    dest: Box<dyn BNDest>,
     loop_stack: Vec<usize>,
     loop_count: usize
 }
 
 impl X86X64LinuxEmitter
 {
-    pub const fn new(dest: Box<dyn BNEmitDest>) -> X86X64LinuxEmitter
+    pub const fn new(dest: Box<dyn BNDest>) -> X86X64LinuxEmitter
     {
         return X86X64LinuxEmitter{ dest: dest, loop_stack: Vec::new(), loop_count: 0 };
     }
@@ -26,35 +26,35 @@ impl BNEmitter for X86X64LinuxEmitter
         self.dest.push("section .data\ntape times 30000 db 0\nsection .text\nglobal _start\n_start:\nlea rsi, [rel tape]\nmov [rsi], 0\n");
     }
 
-    fn emit_arithmetic(&mut self, node: &InstrNode)
+    fn emit_arithmetic(&mut self, node: &Node)
     {
         match *node {
-            InstrNode::Add(value) => self.dest.push(format!("add byte [rsi], {}\n", value).as_str()),
-            InstrNode::Sub(value) => self.dest.push(format!("sub byte [rsi], {}\n", value).as_str()),
+            Node::Add(value) => self.dest.push(format!("add byte [rsi], {}\n", value).as_str()),
+            Node::Sub(value) => self.dest.push(format!("sub byte [rsi], {}\n", value).as_str()),
             _ => panic!("Node found that was not Add or Sub")
         }
     }
 
-    fn emit_shift(&mut self, node: &InstrNode)
+    fn emit_shift(&mut self, node: &Node)
     {
         match *node {
-            InstrNode::Right(value) => self.dest.push(format!("add rsi, {}\n", value).as_str()),
-            InstrNode::Left(value) => self.dest.push(format!("sub rsi, {}\n", value).as_str()),
+            Node::Right(value) => self.dest.push(format!("add rsi, {}\n", value).as_str()),
+            Node::Left(value) => self.dest.push(format!("sub rsi, {}\n", value).as_str()),
             _ => panic!("Node found that was not Right or Left")
         }
     }
 
-    fn emit_jump(&mut self, node: &InstrNode)
+    fn emit_jump(&mut self, node: &Node)
     {
         match *node {
-            InstrNode::JumpIfZero(_value) => {
+            Node::JumpIfZero(_value) => {
                 self.loop_count += 1;
                 self.loop_stack.push(self.loop_count);
                 self.dest.push("cmp byte [rsi], 0\n");
                 self.dest.push(format!("LS_{}:\n", self.loop_count).as_str());
                 self.dest.push(format!("jz LE_{}\n", self.loop_count).as_str());
             },
-            InstrNode::JumpIfNotZero(_value) => {
+            Node::JumpIfNotZero(_value) => {
                 let idx = self.loop_stack.pop().unwrap();
                 self.dest.push(format!("jmp LS_{}\n", idx).as_str());
                 self.dest.push(format!("LE_{}:\n", idx).as_str());
