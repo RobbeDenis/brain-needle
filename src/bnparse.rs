@@ -3,7 +3,7 @@ use std::error::Error;
 use crate::bnlex::Token;
 
 #[derive(Debug, PartialEq)]
-pub enum InstrNode
+pub(crate) enum InstrNode
 {
     Add             (u8),   // value [0-255]
     Sub             (u8),

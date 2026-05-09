@@ -5,7 +5,17 @@ use std::process;
 
 mod bnlex;
 mod bnparse;
+
+mod bngen;
+mod bngen_ctx;
+mod bngen_emit;
+mod bngen_x86_64_linux;
+
 mod testhelp;
+
+use crate::bngen::generate_output;
+use crate::bngen_ctx::*;
+
 
 fn main() 
 {
@@ -35,6 +45,15 @@ fn main()
     for node in &flat_instr_tree {
         print!("{:?} ", node);
     }
+
+
+    let target_ctx = TargetContext { 
+        os:     TargetOS::Windows, 
+        arch:   Architecture::X86_64, 
+        out:    Output::Assembly(AsmFlavor::NASM)
+    };
+
+    generate_output(flat_instr_tree, target_ctx);
 }
 
 struct Config 
@@ -46,15 +65,13 @@ impl Config
 {
     fn build(args: &[String]) -> Result<Config, &'static str> 
     {
-        if args.len() < 2 {
-            return Err("to few arguments, file name is needed");
+        let mut file = path::PathBuf::from("brainfuck_src\\hello.bf");
+
+        if args.len() > 1 {
+            file = path::PathBuf::from("brainfuck_src");
+            file.push(&args[1]);
         }
     
-        let file = {
-            let mut path = path::PathBuf::from("brainfuck_src");
-            path.push(&args[1]);
-            path
-        };
     
         return Ok(Config{ file });
     }
