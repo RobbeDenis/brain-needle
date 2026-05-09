@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 
 #[allow(dead_code)]
 pub(crate) enum AsmFlavor
@@ -29,7 +31,7 @@ pub(crate) enum Architecture
 }
 
 #[allow(dead_code)]
-pub(crate) enum Output
+pub(crate) enum OutputFormat
 {
     Assembly(AsmFlavor),
     Binary,
@@ -37,9 +39,17 @@ pub(crate) enum Output
 }
 
 #[allow(dead_code)]
+pub(crate) enum OutputDest
+{
+    File(Option<PathBuf>),
+    Stdout
+}
+
+#[allow(dead_code)]
 pub(crate) struct TargetContext
 {
     pub os: TargetOS,
     pub arch: Architecture,
-    pub out: Output
+    pub out: OutputFormat,
+    pub dest: OutputDest
 }
