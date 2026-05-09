@@ -35,7 +35,8 @@ pub(crate) enum OutputFormat
 {
     Assembly(AsmFlavor),
     Binary,
-    Transpiled(Language)
+    Transpiled(Language),
+    
 }
 
 #[allow(dead_code)]

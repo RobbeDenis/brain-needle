@@ -2,6 +2,7 @@
 use std::fs::File;
 use std::io;
 use std::io::{BufReader, Read};
+use std::num::Wrapping;
 use std::path::Path;
 use std::error::Error;
 use std::iter::Peekable;
@@ -41,8 +42,8 @@ pub fn tokenize_file_from_path<T: AsRef<Path>>(path: T) -> Result<Vec<Token>, Bo
         match value {
             ADD => tokens.push(Token::Add(get_amount_inseq_consume(value, &mut reader)?)),
             SUB => tokens.push(Token::Sub(get_amount_inseq_consume(value, &mut reader)?)),
-            RIGHT => tokens.push(Token::Right(get_amount_inseq_consume(value, &mut reader)?)),
-            LEFT => tokens.push(Token::Left(get_amount_inseq_consume(value, &mut reader)?)),
+            RIGHT => tokens.push(Token::Right(get_amount_inseq_consume(value, &mut reader)?)), // TODO does it have to wrap??
+            LEFT => tokens.push(Token::Left(get_amount_inseq_consume(value, &mut reader)?)), // TODO does it have to wrap??
             LOOP => tokens.push(Token::Loop),
             BACK => tokens.push(Token::Back),
             OUT => tokens.push(Token::Out),
@@ -61,10 +62,7 @@ where T: Iterator<Item = io::Result<u8>>
 
     while let Some(Ok(byte)) = reader.peek() {
         if *byte == value {
-            if count == u8::MAX {
-                return Err(format!("token count exceeded {} for {}", u8::MAX, value as char).into());
-            }
-            count += 1;
+            count = count.wrapping_add(1);
             reader.next();
         } else {
             break;
