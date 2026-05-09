@@ -13,6 +13,7 @@ mod bngen_emit;
 mod bngen_x86_64_linux;
 
 mod bngen_dest;
+mod bngen_file;
 mod bngen_stdout;
 
 mod testhelp;

@@ -1,5 +1,6 @@
 
 use crate::bngen_ctx::*;
+use crate::bngen_file::FileDest;
 use crate::bngen_stdout::StdoutDest;
 
 pub trait BNEmitDest
@@ -12,8 +13,12 @@ pub struct BNEmitDestFactory;
 
 impl BNEmitDestFactory
 {
-    pub fn create(_target_ctx: &TargetContext) -> Box<dyn BNEmitDest>
+    pub fn create(target_ctx: &TargetContext) -> Box<dyn BNEmitDest>
     {
-        return Box::new(StdoutDest::new());
+        if target_ctx.dest == OutputDest::File(None) {
+            return Box::new(FileDest::new());
+        } else {
+            return Box::new(StdoutDest::new());
+        }
     }
 }

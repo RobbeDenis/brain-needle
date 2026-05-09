@@ -39,6 +39,7 @@ pub(crate) enum OutputFormat
 }
 
 #[allow(dead_code)]
+#[derive(PartialEq)]
 pub(crate) enum OutputDest
 {
     File(Option<PathBuf>),
