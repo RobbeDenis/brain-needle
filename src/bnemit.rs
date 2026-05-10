@@ -1,12 +1,16 @@
 
 // public modules
 pub mod bnemit_x86_64_linux;
+pub mod bnemit_interpreted;
+
+// emitters
+use bnemit_x86_64_linux::X86X64LinuxEmitter;
+use bnemit_interpreted::InterpretedEmitter;
 
 // using
-use bnemit_x86_64_linux::X86X64LinuxEmitter;
 use crate::bndest::BNDestFactory;
 use crate::bnparse::Node;
-use crate::bnctx::TargetContext;
+use crate::bnctx::{OutputFormat, TargetContext};
 
 pub trait BNEmitter
 {
@@ -29,6 +33,10 @@ impl BNEmitterFactory
 {
     pub fn create(target_ctx: &TargetContext) -> Box<dyn BNEmitter>
     {
-        return Box::new(X86X64LinuxEmitter::new(BNDestFactory::create(&target_ctx)));
+        match &target_ctx.format {
+            OutputFormat::Assembly(_value) => return Box::new(X86X64LinuxEmitter::new(BNDestFactory::create(&target_ctx))),
+            OutputFormat::Interpreted => return Box::new(InterpretedEmitter::new(BNDestFactory::create(&target_ctx))),
+            _ => return Box::new(InterpretedEmitter::new(BNDestFactory::create(&target_ctx)))
+        }
     }
 }

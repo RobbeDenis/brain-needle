@@ -1,17 +1,19 @@
 
 // using
+use crate::bncore::UMaxSeq;
+use crate::bncore::UMaxIdx;
 use crate::bnlex::Token;
 use std::error::Error;
 
 #[derive(Debug, PartialEq)]
 pub enum Node
 {
-    Add             (u8),   // value [0-255]
-    Sub             (u8),
-    Right           (u8),
-    Left            (u8),
-    JumpIfZero      (u16),  // index [0-30'000]
-    JumpIfNotZero   (u16),
+    Add             (UMaxSeq),
+    Sub             (UMaxSeq),
+    Right           (UMaxSeq),
+    Left            (UMaxSeq),
+    JumpIfZero      (UMaxIdx),
+    JumpIfNotZero   (UMaxIdx),
     Out,
     In
 }
@@ -21,16 +23,20 @@ pub fn create_flat_instr_tree_from_tokens(tokens: Vec<Token>) -> Result<Vec<Node
     let mut instr_tree: Vec<Node> = Vec::new();
     let mut loop_start_queue: Vec<usize> = Vec::new();
 
-    if tokens.len() > u16::MAX as usize {
-        return Err("program too large for 16-bit addressing".into());
+    if tokens.len() > UMaxIdx::MAX as usize {
+        return Err(format!("program too large for {}-bit addressing", UMaxIdx::BITS).into());
     }
 
     for (i, token) in tokens.iter().enumerate() {
         match *token {
             Token::Add(value) => instr_tree.push(Node::Add(value)),
             Token::Sub(value) => instr_tree.push(Node::Sub(value)),
-            Token::Right(value) => instr_tree.push(Node::Right(value)),
-            Token::Left(value) => instr_tree.push(Node::Left(value)),
+            Token::Right(value) => {
+                instr_tree.push(Node::Right(value))
+            },
+            Token::Left(value) => {
+                instr_tree.push(Node::Left(value))
+            },
             Token::Out => instr_tree.push(Node::Out),
             Token::In => instr_tree.push(Node::In),
             Token::Loop => {
@@ -42,8 +48,8 @@ pub fn create_flat_instr_tree_from_tokens(tokens: Vec<Token>) -> Result<Vec<Node
                     format!("loop token mismatch: found end \']\' without a matching start \'[\' at index {}", i)
                 )?;
 
-                instr_tree.push(Node::JumpIfNotZero(start_idx as u16));
-                instr_tree[start_idx] = Node::JumpIfZero(i as u16);
+                instr_tree.push(Node::JumpIfNotZero(start_idx as UMaxIdx));
+                instr_tree[start_idx] = Node::JumpIfZero(i as UMaxIdx);
             }
         }
     }

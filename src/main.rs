@@ -1,5 +1,6 @@
 
 // modules
+mod bncore;
 mod bnctx;
 mod bndest;
 mod bnemit;
@@ -16,6 +17,7 @@ fn main()
     use bnctx::*;
     use std::env;
     use std::process;
+    use bncore::Config;
 
     let args: Vec<String> = env::args().collect();
 
@@ -37,29 +39,9 @@ fn main()
     let target_ctx = TargetContext { 
         os:     TargetOS::Linux, 
         arch:   Architecture::X86_64, 
-        out:    OutputFormat::Assembly(AsmFlavor::NASM),
-        dest:   OutputDest::File(None)
+        format: OutputFormat::Interpreted,
+        dest:   OutputDest::Stdout
     };
 
     bngen::generate_output(flat_instr_tree, target_ctx);
-}
-
-struct Config 
-{
-    file: std::path::PathBuf
-}
-
-impl Config
-{
-    fn build(args: &[String]) -> Result<Config, &'static str> 
-    {
-        let mut file = std::path::PathBuf::from("src_bf\\hello.bf");
-
-        if args.len() > 1 {
-            file = std::path::PathBuf::from("src_bf");
-            file.push(&args[1]);
-        }
-    
-        return Ok(Config{ file });
-    }
 }

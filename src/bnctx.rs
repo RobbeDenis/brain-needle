@@ -37,7 +37,7 @@ pub(crate) enum OutputFormat
     Assembly(AsmFlavor),
     Binary,
     Transpiled(Language),
-    BFInterpret
+    Interpreted
 }
 
 #[allow(dead_code)]
@@ -53,6 +53,6 @@ pub(crate) struct TargetContext
 {
     pub os: TargetOS,
     pub arch: Architecture,
-    pub out: OutputFormat,
+    pub format: OutputFormat,
     pub dest: OutputDest
 }

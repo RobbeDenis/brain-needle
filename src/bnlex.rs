@@ -1,5 +1,6 @@
 
 // using
+use crate::bncore::UMaxSeq;
 use std::fs::File;
 use std::io;
 use std::io::Read;
@@ -10,16 +11,16 @@ use std::iter::Peekable;
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token
 {
-    Add     (u8),
-    Sub     (u8),
-    Right   (u8),
-    Left    (u8),
+    Add     (UMaxSeq),
+    Sub     (UMaxSeq),
+    Right   (UMaxSeq),
+    Left    (UMaxSeq),
     Loop,
     Back,
     Out,
     In
 }
- 
+
 const ADD: u8     = 43; // +
 const SUB: u8     = 45; // -
 const RIGHT: u8   = 62; // >
@@ -37,13 +38,13 @@ pub fn tokenize_file_from_path<T: AsRef<Path>>(path: T) -> Result<Vec<Token>, Bo
     let mut reader = io::BufReader::new(file).bytes().peekable();
 
     while let Some(byte) = reader.next() {
-        let value = byte?;
+        let value: u8  = byte?;
         
         match value {
             ADD => tokens.push(Token::Add(get_amount_inseq_consume(value, &mut reader)?)),
             SUB => tokens.push(Token::Sub(get_amount_inseq_consume(value, &mut reader)?)),
-            RIGHT => tokens.push(Token::Right(get_amount_inseq_consume(value, &mut reader)?)), // TODO does it have to wrap??
-            LEFT => tokens.push(Token::Left(get_amount_inseq_consume(value, &mut reader)?)), // TODO does it have to wrap??
+            RIGHT => tokens.push(Token::Right(get_amount_inseq_consume(value, &mut reader)?)),
+            LEFT => tokens.push(Token::Left(get_amount_inseq_consume(value, &mut reader)?)),
             LOOP => tokens.push(Token::Loop),
             BACK => tokens.push(Token::Back),
             OUT => tokens.push(Token::Out),
@@ -55,14 +56,22 @@ pub fn tokenize_file_from_path<T: AsRef<Path>>(path: T) -> Result<Vec<Token>, Bo
     return Ok(tokens);
 }
 
-fn get_amount_inseq_consume<T>(value: u8, reader: &mut Peekable<T>) -> Result<u8, Box<dyn Error>>
+fn get_amount_inseq_consume<T>(value: u8, reader: &mut Peekable<T>) -> Result<UMaxSeq, Box<dyn Error>>
 where T: Iterator<Item = io::Result<u8>>
 {
-    let mut count: u8 = 1;
+    let mut count: UMaxSeq = 1;
 
     while let Some(Ok(byte)) = reader.peek() {
         if *byte == value {
-            count = count.wrapping_add(1);
+            if count >= UMaxSeq::MAX {
+                return Err(format!(
+                    "Maximum allowed of identical tokens in sequence has been reached\nmax: {}\n current: {} {} tokens", 
+                    UMaxSeq::MAX, 
+                    count, 
+                    value as char)
+                    .into());
+            }
+            count += 1;
             reader.next();
         } else {
             break;
