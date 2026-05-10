@@ -1,6 +1,6 @@
 
 // using
-use crate::bncore::UMaxSeq;
+use crate::bncore::USeq;
 use std::fs::File;
 use std::io;
 use std::io::Read;
@@ -11,10 +11,10 @@ use std::iter::Peekable;
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token
 {
-    Add     (UMaxSeq),
-    Sub     (UMaxSeq),
-    Right   (UMaxSeq),
-    Left    (UMaxSeq),
+    Add     (USeq),
+    Sub     (USeq),
+    Right   (USeq),
+    Left    (USeq),
     Loop,
     Back,
     Out,
@@ -56,17 +56,17 @@ pub fn tokenize_file_from_path<T: AsRef<Path>>(path: T) -> Result<Vec<Token>, Bo
     return Ok(tokens);
 }
 
-fn get_amount_inseq_consume<T>(value: u8, reader: &mut Peekable<T>) -> Result<UMaxSeq, Box<dyn Error>>
+fn get_amount_inseq_consume<T>(value: u8, reader: &mut Peekable<T>) -> Result<USeq, Box<dyn Error>>
 where T: Iterator<Item = io::Result<u8>>
 {
-    let mut count: UMaxSeq = 1;
+    let mut count: USeq = 1;
 
     while let Some(Ok(byte)) = reader.peek() {
         if *byte == value {
-            if count >= UMaxSeq::MAX {
+            if count >= USeq::MAX {
                 return Err(format!(
                     "Maximum allowed of identical tokens in sequence has been reached\nmax: {}\n current: {} {} tokens", 
-                    UMaxSeq::MAX, 
+                    USeq::MAX, 
                     count, 
                     value as char)
                     .into());

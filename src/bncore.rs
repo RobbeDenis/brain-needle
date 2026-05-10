@@ -1,12 +1,13 @@
 
 
 pub const MAX_PROGRAM_BYTES: usize = 30000;
+pub const BYTE_CEIL_WRAP: u8 = 255;
 
 // Maximum index allowed
-pub type UMaxIdx = u16;
+pub type UIdx = u16;
 
 // Maximum amount of identical tokens in sequence
-pub type UMaxSeq = UMaxIdx;
+pub type USeq = UIdx;
 
 // Configuration
 pub struct Config 

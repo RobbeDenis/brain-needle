@@ -1,19 +1,19 @@
 
 // using
-use crate::bncore::UMaxSeq;
-use crate::bncore::UMaxIdx;
+use crate::bncore::USeq;
+use crate::bncore::UIdx;
 use crate::bnlex::Token;
 use std::error::Error;
 
 #[derive(Debug, PartialEq)]
 pub enum Node
 {
-    Add             (UMaxSeq),
-    Sub             (UMaxSeq),
-    Right           (UMaxSeq),
-    Left            (UMaxSeq),
-    JumpIfZero      (UMaxIdx),
-    JumpIfNotZero   (UMaxIdx),
+    Add             (USeq),
+    Sub             (USeq),
+    Right           (USeq),
+    Left            (USeq),
+    JumpIfZero      (UIdx),
+    JumpIfNotZero   (UIdx),
     Out,
     In
 }
@@ -23,8 +23,8 @@ pub fn create_flat_instr_tree_from_tokens(tokens: Vec<Token>) -> Result<Vec<Node
     let mut instr_tree: Vec<Node> = Vec::new();
     let mut loop_start_queue: Vec<usize> = Vec::new();
 
-    if tokens.len() > UMaxIdx::MAX as usize {
-        return Err(format!("program too large for {}-bit addressing", UMaxIdx::BITS).into());
+    if tokens.len() > UIdx::MAX as usize {
+        return Err(format!("program too large for {}-bit addressing", UIdx::BITS).into());
     }
 
     for (i, token) in tokens.iter().enumerate() {
@@ -48,8 +48,8 @@ pub fn create_flat_instr_tree_from_tokens(tokens: Vec<Token>) -> Result<Vec<Node
                     format!("loop token mismatch: found end \']\' without a matching start \'[\' at index {}", i)
                 )?;
 
-                instr_tree.push(Node::JumpIfNotZero(start_idx as UMaxIdx));
-                instr_tree[start_idx] = Node::JumpIfZero(i as UMaxIdx);
+                instr_tree.push(Node::JumpIfNotZero(start_idx as UIdx));
+                instr_tree[start_idx] = Node::JumpIfZero(i as UIdx);
             }
         }
     }
