@@ -44,6 +44,7 @@ pub trait BNEmitterFactory
     }
 }
 
+#[derive(Default)]
 pub struct BNEmitterFactoryDefault;
 impl BNEmitterFactory for BNEmitterFactoryDefault
 {

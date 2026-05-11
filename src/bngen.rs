@@ -4,9 +4,9 @@ use crate::bnparse::Node;
 use crate::bnctx::TargetContext;
 use crate::bnemit::*;
 
-pub fn generate_output(instr_tree: Vec<Node>, target_ctx: TargetContext)
+pub fn generate_output<TFactory: BNEmitterFactory + Default>(instr_tree: Vec<Node>, target_ctx: TargetContext)
 {
-    let mut factory = BNEmitterFactoryDefault{};
+    let mut factory = TFactory::default();
     let mut codegen = factory.create(&target_ctx);
     
     codegen.emit_setup();

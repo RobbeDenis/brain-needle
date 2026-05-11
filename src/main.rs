@@ -1,10 +1,12 @@
 
 
+
 fn main() 
 {
     use brain_needle::*;
-    use brain_needle::bnctx::*;
-    use brain_needle::bncore::Config;
+    use bnctx::*;
+    use bncore::Config;
+    use bnemit::BNEmitterFactoryDefault;
     use std::path::PathBuf;
     use std::env;
     use std::process;
@@ -32,5 +34,5 @@ fn main()
         dest:   OutputDest::File(Some(PathBuf::from("output\\dump.txt")))
     };
 
-    bngen::generate_output(flat_instr_tree, target_ctx);
+    bngen::generate_output::<BNEmitterFactoryDefault>(flat_instr_tree, target_ctx);
 }
