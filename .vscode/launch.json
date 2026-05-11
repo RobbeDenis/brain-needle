@@ -1,0 +1,27 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug BN (GNU)",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "run",
+                    "--bin=brain-needle"
+                ]
+            }
+        },
+        {
+            "name": "Debug BN test (GNU)",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--bin=brain-needle"
+                ]
+            }
+        }
+    ]
+}

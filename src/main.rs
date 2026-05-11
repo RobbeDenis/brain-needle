@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 
 // modules
 mod bncore;
@@ -11,17 +13,16 @@ mod bnparse;
 // public crate modules
 pub(crate) mod bn_test_helper;
 
+
 fn main() 
 {
-    // using
     use bnctx::*;
     use std::env;
     use std::process;
     use bncore::Config;
 
     let args: Vec<String> = env::args().collect();
-
-        let config = Config::build(&args).unwrap_or_else(|err| {
+    let config = Config::build(&args).unwrap_or_else(|err| {
         println!("Problem parsing arguments: {err}");
         process::exit(1);
     });
@@ -40,7 +41,7 @@ fn main()
         os:     TargetOS::Linux, 
         arch:   Architecture::X86_64, 
         format: OutputFormat::Interpreted,
-        dest:   OutputDest::Stdout
+        dest:   OutputDest::File(Some(PathBuf::from("output\\dump.txt")))
     };
 
     bngen::generate_output(flat_instr_tree, target_ctx);

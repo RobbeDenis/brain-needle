@@ -24,7 +24,7 @@ impl BNEmitter for InterpretedEmitter
 {
     fn emit_setup(&mut self)
     {
-        self.cells.reserve_exact(MAX_PROGRAM_BYTES);
+        self.cells.resize(MAX_PROGRAM_BYTES, 0);
     }
 
     fn emit_arithmetic(&mut self, node: &Node)
@@ -50,11 +50,11 @@ impl BNEmitter for InterpretedEmitter
             Node::Left(value) => {
                 self.ptr_idx = (self.ptr_idx + MAX_PROGRAM_BYTES - (*value as usize % MAX_PROGRAM_BYTES)) % MAX_PROGRAM_BYTES;
             },
-            _ => panic!("Called emit_arithmetic when given node was not arithmetic")
+            _ => panic!("Called emit_shift when given node was not a shift")
         }
     }
 
-    fn emit_jump(&mut self, node: &Node)
+    fn emit_jump(&mut self, _node: &Node)
     {
 
     }
