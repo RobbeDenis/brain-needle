@@ -1,23 +1,22 @@
 
-// using
 use std::path::PathBuf;
 
 #[allow(dead_code)]
-pub(crate) enum AsmFlavor
+pub enum AsmFlavor
 {
     NASM,
     GAS
 }
 
 #[allow(dead_code)]
-pub(crate) enum Language
+pub enum Language
 {
     C,
     Cpp
 }
 
 #[allow(dead_code)]
-pub(crate) enum TargetOS
+pub enum TargetOS
 {
     Windows,
     Linux,
@@ -25,14 +24,14 @@ pub(crate) enum TargetOS
 }
 
 #[allow(dead_code)]
-pub(crate) enum Architecture
+pub enum Architecture
 {
     X86_64,
     AArch64
 }
 
 #[allow(dead_code)]
-pub(crate) enum OutputFormat
+pub enum OutputFormat
 {
     Assembly(AsmFlavor),
     Binary,
@@ -42,14 +41,14 @@ pub(crate) enum OutputFormat
 
 #[allow(dead_code)]
 #[derive(PartialEq)]
-pub(crate) enum OutputDest
+pub enum OutputDest
 {
     File(Option<PathBuf>),
     Stdout
 }
 
 #[allow(dead_code)]
-pub(crate) struct TargetContext
+pub struct TargetContext
 {
     pub os: TargetOS,
     pub arch: Architecture,

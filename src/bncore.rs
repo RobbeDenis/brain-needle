@@ -19,6 +19,8 @@ pub const DEFAULT_BF_DIR: &str = "src-bf";
 #[allow(unused)]
 pub const DEFAULT_BF_FILE: &str = "hello.bf";
 #[allow(unused)]
+pub const DEFAULT_BF_PATH: &str = "src-bf\\hello.bf";
+#[allow(unused)]
 pub const DEFAULT_OUT_DIR: &str = "output";
 #[allow(unused)]
 pub const DEFAULT_OUT_FILE: &str = "hello.asm";

@@ -94,11 +94,12 @@ mod lexer_tests
 {
     use super::*;
     use crate::hello_world_tokens;
+    use crate::bncore::DEFAULT_BF_PATH;
 
     #[test]
     fn print()
     {
-        let file = "brainfuck_src\\hello.bf";
+        let file = DEFAULT_BF_PATH;
         let tokens = tokenize_file_from_path(file).expect("Failed to tokenize the file");
 
         assert!(!tokens.is_empty(), "[Print Failed]\nToken vector should not be empty");
@@ -113,7 +114,7 @@ mod lexer_tests
     #[test]
     fn compare_expected()
     {
-        let file = "brainfuck_src\\hello.bf";
+        let file = DEFAULT_BF_PATH;
         let expected_tokens: Vec<Token> = hello_world_tokens!();
 
         let tokens = tokenize_file_from_path(file).expect("Failed to tokenize the file");

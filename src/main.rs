@@ -1,25 +1,13 @@
-use std::path::PathBuf;
-
-
-// modules
-mod bncore;
-mod bnctx;
-mod bndest;
-mod bnemit;
-mod bngen;
-mod bnlex;
-mod bnparse;
-
-// public crate modules
-pub(crate) mod bn_test_helper;
 
 
 fn main() 
 {
-    use bnctx::*;
+    use brain_needle::*;
+    use brain_needle::bnctx::*;
+    use brain_needle::bncore::Config;
+    use std::path::PathBuf;
     use std::env;
     use std::process;
-    use bncore::Config;
 
     let args: Vec<String> = env::args().collect();
     let config = Config::build(&args).unwrap_or_else(|err| {

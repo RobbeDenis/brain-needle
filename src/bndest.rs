@@ -22,7 +22,7 @@ impl BNDestFactory
     pub fn create(target_ctx: &TargetContext) -> Box<dyn BNDest>
     {
         return match &target_ctx.dest {
-            OutputDest::File(option) =>Box::new(FileDest::new(option.clone())),
+            OutputDest::File(option) => Box::new(FileDest::new(option.clone())),
             OutputDest::Stdout => Box::new(StdoutDest::new())
         }
     }

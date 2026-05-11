@@ -2,11 +2,12 @@
 // using
 use crate::bnparse::Node;
 use crate::bnctx::TargetContext;
-use crate::bnemit::BNEmitterFactory;
+use crate::bnemit::*;
 
 pub fn generate_output(instr_tree: Vec<Node>, target_ctx: TargetContext)
 {
-    let mut codegen = BNEmitterFactory::create(&target_ctx);
+    let mut factory = BNEmitterFactoryDefault{};
+    let mut codegen = factory.create(&target_ctx);
     
     codegen.emit_setup();
     
