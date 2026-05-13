@@ -1,22 +1,9 @@
 
 // using
-use crate::bncore::USeq;
 use crate::bncore::UIdx;
-use crate::bnlex::Token;
+use crate::bncore::Node;
+use crate::bncore::Token;
 use std::error::Error;
-
-#[derive(Debug, PartialEq)]
-pub enum Node
-{
-    Add             (USeq),
-    Sub             (USeq),
-    Right           (USeq),
-    Left            (USeq),
-    JumpIfZero      (UIdx),
-    JumpIfNotZero   (UIdx),
-    Out,
-    In
-}
 
 pub fn create_flat_instr_tree_from_tokens(tokens: Vec<Token>) -> Result<Vec<Node>, Box<dyn Error>>
 {

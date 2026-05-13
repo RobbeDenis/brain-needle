@@ -1,6 +1,6 @@
 
 // using
-use crate::bnparse::Node;
+use crate::bncore::Node;
 use crate::bnctx::TargetContext;
 use crate::bnemit::*;
 

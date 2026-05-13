@@ -3,7 +3,7 @@
 use crate::bncore::MAX_PROGRAM_BYTES;
 use crate::bnemit::BNEmitter;
 use crate::bndest::BNDest;
-use crate::bnparse::Node;
+use crate::bncore::Node;
 
 pub struct InterpretedEmitter
 {

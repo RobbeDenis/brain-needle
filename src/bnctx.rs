@@ -44,14 +44,15 @@ pub enum OutputFormat
 pub enum OutputDest
 {
     File(Option<PathBuf>),
-    Stdout
+    Stdout,
+    Custom
 }
 
 #[allow(dead_code)]
 pub struct TargetContext
 {
-    pub os: TargetOS,
-    pub arch: Architecture,
+    pub dest: OutputDest,
     pub format: OutputFormat,
-    pub dest: OutputDest
+    pub os: TargetOS,
+    pub arch: Architecture
 }

@@ -7,4 +7,4 @@ pub mod bngen;
 pub mod bnlex;
 pub mod bnparse;
 
-pub(crate) mod bn_test_helper;
+mod case_macros;

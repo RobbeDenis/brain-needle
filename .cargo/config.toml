@@ -2,4 +2,6 @@
 rustflags = ["-C", "split-debuginfo=off"]
 
 [alias]
+testp = "test -- --nocapture --test-threads=1"
 itest = "test --test test_core"
+itestp = "test --test test_core -- --nocapture --test-threads=1"

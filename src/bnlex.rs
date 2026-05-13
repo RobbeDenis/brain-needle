@@ -1,25 +1,13 @@
 
 // using
 use crate::bncore::USeq;
+use crate::bncore::Token;
 use std::fs::File;
 use std::io;
 use std::io::Read;
 use std::path::Path;
 use std::error::Error;
 use std::iter::Peekable;
-
-#[derive(Debug, PartialEq, Clone, Copy)]
-pub enum Token
-{
-    Add     (USeq),
-    Sub     (USeq),
-    Right   (USeq),
-    Left    (USeq),
-    Loop,
-    Back,
-    Out,
-    In
-}
 
 const ADD: u8     = 43; // +
 const SUB: u8     = 45; // -

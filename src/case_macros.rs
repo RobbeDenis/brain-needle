@@ -1,8 +1,12 @@
 
+////////////////////////////
+////  test case macros  ////
+////////////////////////////
+
 #[macro_export]
 macro_rules! hello_world_tokens {
     () => {{
-        use $crate::bnlex::Token::*;
+        use $crate::bncore::Token::*;
         vec![
             Add(10),    Loop,       Right(1),   Add(1),     Right(1),   // 4
             Add(3),     Right(1),   Add(7),     Right(1),   Add(10),    // 9
@@ -19,7 +23,7 @@ macro_rules! hello_world_tokens {
 #[macro_export]
 macro_rules! hello_world_instr_tree {
     () => {{
-        use $crate::bnparse::Node::*;
+        use $crate::bncore::Node::*;
         vec![
             Add(10),    JumpIfZero(12), Right(1),           Add(1),     Right(1),   // 4
             Add(3),     Right(1),       Add(7),             Right(1),   Add(10),    // 9

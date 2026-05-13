@@ -10,7 +10,7 @@ use bnemit_interpreted::InterpretedEmitter;
 // using
 use crate::bndest::BNDestFactory;
 use crate::bndest::BNDest;
-use crate::bnparse::Node;
+use crate::bncore::Node;
 use crate::bnctx::{OutputFormat, TargetContext};
 
 pub trait BNEmitter
@@ -37,7 +37,7 @@ pub trait BNEmitterFactory
     }
 
     /// INTERNAL USE ONLY: Used by `create` to hook up the destination.
-    /// Consider using BNDestFactory instead.
+    /// Consider using BNDestFactory instead or implement create_dest to handle custom destinations.
     fn create_dest(&mut self, target_ctx: &TargetContext) -> Box<dyn BNDest>
     {
         return BNDestFactory::create(&target_ctx);

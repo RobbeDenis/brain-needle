@@ -10,6 +10,32 @@ pub type UIdx = u16;
 // Maximum amount of identical tokens in sequence
 pub type USeq = UIdx;
 
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum Token
+{
+    Add     (USeq),
+    Sub     (USeq),
+    Right   (USeq),
+    Left    (USeq),
+    Loop,
+    Back,
+    Out,
+    In
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Node
+{
+    Add             (USeq),
+    Sub             (USeq),
+    Right           (USeq),
+    Left            (USeq),
+    JumpIfZero      (UIdx),
+    JumpIfNotZero   (UIdx),
+    Out,
+    In
+}
+
 ///////////////////////
 // App Configuration //
 ///////////////////////

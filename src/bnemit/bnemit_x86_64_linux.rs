@@ -2,7 +2,7 @@
 // using
 use crate::bnemit::BNEmitter;
 use crate::bndest::BNDest;
-use crate::bnparse::Node;
+use crate::bncore::Node;
 
 pub struct X86X64LinuxEmitter // needs drop???
 {

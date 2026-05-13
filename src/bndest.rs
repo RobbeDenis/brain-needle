@@ -23,7 +23,8 @@ impl BNDestFactory
     {
         return match &target_ctx.dest {
             OutputDest::File(option) => Box::new(FileDest::new(option.clone())),
-            OutputDest::Stdout => Box::new(StdoutDest::new())
+            OutputDest::Stdout => Box::new(StdoutDest::new()),
+            OutputDest::Custom => panic!("Custom destinaiton case is required to be handled by implementing BNEmitterFactory::create_dest")
         }
     }
 }
