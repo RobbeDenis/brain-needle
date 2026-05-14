@@ -1,6 +1,7 @@
 
 // using
 use crate::bncore::MAX_PROGRAM_BYTES;
+use crate::bncore::BYTE_CEIL_WRAP_U8;
 use crate::bnemit::BNEmitter;
 use crate::bndest::BNDest;
 use crate::bncore::Node;
@@ -31,10 +32,10 @@ impl BNEmitter for InterpretedEmitter
     {
         match node {
             Node::Add(value) => {
-                self.cells[self.ptr_idx] = self.cells[self.ptr_idx].wrapping_add(*value as u8);
+                self.cells[self.ptr_idx] = self.cells[self.ptr_idx].wrapping_add(*value as u8) % BYTE_CEIL_WRAP_U8;
             },
             Node::Sub(value) => {
-                self.cells[self.ptr_idx] = self.cells[self.ptr_idx].wrapping_sub(*value as u8);
+                self.cells[self.ptr_idx] = self.cells[self.ptr_idx].wrapping_sub(*value as u8) % BYTE_CEIL_WRAP_U8;
             },
             _ => panic!("Called emit_arithmetic when given node was not arithmetic")
         }
@@ -62,6 +63,8 @@ impl BNEmitter for InterpretedEmitter
     fn emit_out(&mut self)
     {
         let c = (self.cells[self.ptr_idx] as char).to_string();
+        // let test: u8 = 122;
+        // let c = (test as char).to_string();
         self.dest.push(&c);
     }
 

@@ -3,7 +3,9 @@
 #[allow(unused)]
 pub const MAX_PROGRAM_BYTES: usize = 30000;
 #[allow(unused)]
-pub const BYTE_CEIL_WRAP: u8 = 255;
+pub const BYTE_CEIL_WRAP_U8: u8 = 128;
+#[allow(unused)]
+pub const BYTE_CEIL_WRAP_U16: u16 = 128;
 
 // Maximum index allowed
 pub type UIdx = u16;
