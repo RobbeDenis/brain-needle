@@ -10,14 +10,8 @@ const CTX: TargetContext = TargetContext {
         dest:   OutputDest::Custom
     };
 
-#[allow(unused)]
-fn expected_char_as_string(num: u8) -> String
-{
-    return (num as char).to_string();
-}
-
 #[test]
-fn wrap_neg()
+fn wrap_right()
 {
     let output = Rc::new(RefCell::new(String::new()));
     {
@@ -28,24 +22,25 @@ fn wrap_neg()
         
         use Node::*;
         let tree: Vec<Node> = vec![
-            Sub(1), Out, Right(1), Sub(24708), Out, 
-            Right(1), Sub(40), Sub(40), Out,
-            Right(1), Sub(489), Sub(123), Sub(100), Out
+            Add(64), Right(30000), Out,
+            Add(20), Right(15000), Add(80), Out,
+            Right(15001), Sub(20), Out,
+            Left(1), Out
         ];
 
         test_generate_output(tree, CTX, &mut factory);
     }
     let output = output.take();
     
-    let expected = vec![127, 124, 48, 56];
-    let expected = String::from_utf8(expected).unwrap();   
+    let expected = vec![64, 80, 108, 84];
+    let expected = String::from_utf8(expected).unwrap(); 
     
-    print_captured_output!(output, "WRAP NEG");
+    print_captured_output!(output, "WRAP RIGHT");
     assert!(output == expected, "Expected value: {}\nActual value: {}", expected, output);
 }
 
 #[test]
-fn wrap_pos()
+fn wrap_left()
 {
     let output = Rc::new(RefCell::new(String::new()));
     {
@@ -56,18 +51,19 @@ fn wrap_pos()
         
         use Node::*;
         let tree: Vec<Node> = vec![
-            Add(256), Out, Right(1), Add(8541), Out,
-            Right(1), Add(145), Add(14854), Add(50), Out,
-            Right(1), Add(588), Out
+            Add(64), Left(30000), Out,
+            Add(20), Left(15000), Add(80), Out,
+            Left(15001), Sub(20), Out,
+            Right(1), Out
         ];
 
         test_generate_output(tree, CTX, &mut factory);
     }
     let output = output.take();
 
-    let expected = vec![0, 93, 73, 76];
-    let expected = String::from_utf8(expected).unwrap();  
+    let expected = vec![64, 80, 108, 84];
+    let expected = String::from_utf8(expected).unwrap();
 
     assert!(output == expected, "Expected value: {}\nActual value: {}", expected, output);
-    print_captured_output!(output, "WRAP POS");
+    print_captured_output!(output, "WRAP LEFT");
 }

@@ -45,7 +45,7 @@ impl BNEmitter for InterpretedEmitter
     {
         match node {
             Node::Right(value) => {
-                self.ptr_idx += *value as usize;
+                self.ptr_idx += *value as usize % MAX_PROGRAM_BYTES;
                 if self.ptr_idx >= MAX_PROGRAM_BYTES { self.ptr_idx = self.ptr_idx % MAX_PROGRAM_BYTES }
             },
             Node::Left(value) => {
