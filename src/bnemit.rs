@@ -18,7 +18,7 @@ pub trait BNEmitter
     fn emit_setup(&mut self);
     fn emit_arithmetic(&mut self, node: &Node);
     fn emit_shift(&mut self, node: &Node);
-    fn emit_jump(&mut self, node: &Node);
+    fn emit_jump(&mut self, node: &Node) -> Option<usize>;
     fn emit_out(&mut self);
     fn emit_in(&mut self);
     fn emit_exit(&mut self);

@@ -55,16 +55,28 @@ impl BNEmitter for InterpretedEmitter
         }
     }
 
-    fn emit_jump(&mut self, _node: &Node)
+    fn emit_jump(&mut self, node: &Node) -> Option<usize>
     {
-
+        match node {
+            Node::JumpIfZero(value) => {
+                if self.cells[self.ptr_idx] == 0 {
+                    return Some(*value as usize);
+                }
+            },
+            Node::JumpIfNotZero(value) => {
+                if self.cells[self.ptr_idx] != 0 {
+                    return Some(*value as usize);
+                }
+            },
+            _ => panic!("Called emit_jump when given node was not a jump")
+        }
+        
+        return None;
     }
 
     fn emit_out(&mut self)
     {
         let c = (self.cells[self.ptr_idx] as char).to_string();
-        // let test: u8 = 122;
-        // let c = (test as char).to_string();
         self.dest.push(&c);
     }
 

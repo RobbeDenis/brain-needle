@@ -7,7 +7,7 @@ fn main()
     use bnctx::*;
     use bncore::Config;
     use bnemit::BNEmitterFactoryDefault;
-    use std::path::PathBuf;
+    // use std::path::PathBuf;
     use std::env;
     use std::process;
 
@@ -31,7 +31,7 @@ fn main()
         os:     TargetOS::Linux, 
         arch:   Architecture::X86_64, 
         format: OutputFormat::Interpreted,
-        dest:   OutputDest::File(Some(PathBuf::from("output\\dump.txt")))
+        dest:   OutputDest::Stdout
     };
 
     bngen::generate_output::<BNEmitterFactoryDefault>(flat_instr_tree, target_ctx);

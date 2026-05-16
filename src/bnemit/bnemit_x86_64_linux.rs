@@ -44,7 +44,7 @@ impl BNEmitter for X86X64LinuxEmitter
         }
     }
 
-    fn emit_jump(&mut self, node: &Node)
+    fn emit_jump(&mut self, node: &Node) -> Option<usize>
     {
         match *node {
             Node::JumpIfZero(_value) => {
@@ -61,6 +61,8 @@ impl BNEmitter for X86X64LinuxEmitter
             },
             _ => panic!("Node found that was not Jump")
         }
+
+        return None;
     }
     
     fn emit_out(&mut self)

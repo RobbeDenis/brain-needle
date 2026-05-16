@@ -5,3 +5,4 @@ rustflags = ["-C", "split-debuginfo=off"]
 testp = "test -- --nocapture --test-threads=1"
 itest = "test --test test*"
 itestp = "test --test test* -- --nocapture --test-threads=1"
+devtest = "test --test test_loop -- --nocapture --test-threads=1"
