@@ -55,21 +55,21 @@ pub const DEFAULT_OUT_FILE: &str = "hello.asm";
 
 pub struct Config 
 {
-    pub file: std::path::PathBuf
+    pub file_path: std::path::PathBuf
 }
 
 impl Config
 {
     pub fn build(args: &[String]) -> Result<Config, &'static str> 
     {
-        let mut file = std::path::PathBuf::from(DEFAULT_BF_DIR);
+        let mut path = std::path::PathBuf::from(DEFAULT_BF_DIR);
 
         if args.len() > 1 {
-            file.push(args[1].trim());
+            path.push(args[1].trim());
         } else {
-            file.push(DEFAULT_BF_FILE);
+            path.push(DEFAULT_BF_FILE);
         }
 
-        return Ok(Config { file: file });
+        return Ok(Config { file_path: path });
     }
 }

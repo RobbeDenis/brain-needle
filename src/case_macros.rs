@@ -7,7 +7,7 @@
 macro_rules! hello_world_tokens {
     () => {{
         use $crate::bncore::Token::*;
-        vec![
+        vec![                                                           // index
             Add(10),    Loop,       Right(1),   Add(1),     Right(1),   // 4
             Add(3),     Right(1),   Add(7),     Right(1),   Add(10),    // 9
             Left(4),    Sub(1),     Back,       Right(3),   Add(2),     // 14
@@ -24,7 +24,7 @@ macro_rules! hello_world_tokens {
 macro_rules! hello_world_instr_tree {
     () => {{
         use $crate::bncore::Node::*;
-        vec![
+        vec![                                                                       // index
             Add(10),    JumpIfZero(12), Right(1),           Add(1),     Right(1),   // 4
             Add(3),     Right(1),       Add(7),             Right(1),   Add(10),    // 9
             Left(4),    Sub(1),         JumpIfNotZero(1),   Right(3),   Add(2),     // 14

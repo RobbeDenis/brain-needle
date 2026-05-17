@@ -87,8 +87,8 @@ mod lexer_tests
     #[test]
     fn print()
     {
-        let file = DEFAULT_BF_PATH;
-        let tokens = tokenize_file_from_path(file).expect("Failed to tokenize the file");
+        let path = DEFAULT_BF_PATH;
+        let tokens = tokenize_file_from_path(path).expect("Failed to tokenize the file");
 
         assert!(!tokens.is_empty(), "[Print Failed]\nToken vector should not be empty");
 
@@ -102,15 +102,15 @@ mod lexer_tests
     #[test]
     fn compare_expected()
     {
-        let file = DEFAULT_BF_PATH;
+        let path = DEFAULT_BF_PATH;
         let expected_tokens: Vec<Token> = hello_world_tokens!();
 
-        let tokens = tokenize_file_from_path(file).expect("Failed to tokenize the file");
+        let tokens = tokenize_file_from_path(path).expect("Failed to tokenize the file");
 
         assert!(
             tokens.len() == expected_tokens.len(),
-            "[Compare Length Failed]\nExpected size: {}\nActual size:   {}", 
-            expected_tokens.len(), 
+            "[Compare Length Failed]\nExpected size: {}\nActual size:   {}",
+            expected_tokens.len(),
             tokens.len()
         );
 
