@@ -7,7 +7,7 @@ fn main()
     use bnemit::BNEmitterFactoryDefault;
 
     #[cfg(not(feature = "args"))]
-    let config: Config = Config { file_path: "src-bf\\test\\wrap_pos.bf".into() };
+    let config: Config = Config { file_path: "src-bf\\test\\wrap_address.bf".into() };
 
     #[cfg(feature = "args")]
     let config = {
@@ -31,10 +31,10 @@ fn main()
     let target_ctx = TargetContext { 
         os:     TargetOS::Linux, 
         arch:   Architecture::X86_64, 
-        format: OutputFormat::Assembly(AsmFlavor::NASM),
-        dest:   OutputDest::File(Some("output\\out.asm".into()))
-        // format: OutputFormat::Interpreted,
-        // dest:   OutputDest::Stdout
+        // format: OutputFormat::Assembly(AsmFlavor::NASM),
+        // dest:   OutputDest::File(Some("output\\out.asm".into()))
+        format: OutputFormat::Interpreted,
+        dest:   OutputDest::Stdout
     };
 
     bngen::generate_output::<BNEmitterFactoryDefault>(flat_instr_tree, target_ctx);
