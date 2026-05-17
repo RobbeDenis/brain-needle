@@ -1,4 +1,4 @@
-prints: Success!
+prints: Success!    (assumes 128 bit width)
 using a counter and print cell; whilst only subtracting the print cell
 
 S: 83   +++++[>----- ----<-]>.                  <
