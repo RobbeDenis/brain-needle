@@ -1,5 +1,5 @@
 prints: Success!
-using a counter and print cell; whilst only subtracting the print cell
+using a counter and print cell; whilst only adding the print cell
 
 S: 83   +++++ +++++[>+++++ +++<-]>+++.                  <
 u: 117  +++++ +++++[>+++++ +++++ +++++ +<-]>++.        <
