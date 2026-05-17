@@ -7,7 +7,7 @@ fn main()
     use bnemit::BNEmitterFactoryDefault;
 
     #[cfg(not(feature = "args"))]
-    let config: Config = Config { file_path: "src-bf\\test\\wrap_neg.bf".into() };
+    let config: Config = Config { file_path: "src-bf\\test\\wrap_pos.bf".into() };
 
     #[cfg(feature = "args")]
     let config = {
@@ -32,8 +32,8 @@ fn main()
         os:     TargetOS::Linux, 
         arch:   Architecture::X86_64, 
         format: OutputFormat::Assembly(AsmFlavor::NASM),
-        // format: OutputFormat::Interpreted,
         dest:   OutputDest::File(Some("output\\out.asm".into()))
+        // format: OutputFormat::Interpreted,
         // dest:   OutputDest::Stdout
     };
 
