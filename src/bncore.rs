@@ -1,7 +1,7 @@
 
 
 #[allow(unused)]
-pub const MAX_PROGRAM_BYTES: usize = 30000;
+pub const MAX_PROGRAM_BYTES: usize =  1 << 15;
 #[allow(unused)]
 pub const BYTE_CEIL_WRAP_U8: u8 = 128;
 #[allow(unused)]

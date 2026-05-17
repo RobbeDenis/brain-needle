@@ -4,6 +4,7 @@ use crate::bnemit::BNEmitter;
 use crate::bndest::BNDest;
 use crate::bncore::Node;
 use crate::bncore::BYTE_CEIL_WRAP_U8;
+use crate::bncore::MAX_PROGRAM_BYTES;
 
 pub struct X86X64LinuxEmitter // needs drop???
 {
@@ -19,9 +20,14 @@ impl X86X64LinuxEmitter
         return X86X64LinuxEmitter{ dest: dest, loop_stack: Vec::new(), loop_count: 0 };
     }
 
-    fn emit_wrap(&mut self)
+    fn emit_arithmetic_wrap(&mut self)
     {
         self.dest.push(format!("\tand byte [rsi], {}\n", BYTE_CEIL_WRAP_U8 - 1).as_str());
+    }
+
+    fn emit_shift_wrap(&mut self)
+    {
+        self.dest.push(format!("\tand rsp, {}\n\tlea rsi, [rbx + rsp]\n", MAX_PROGRAM_BYTES - 1).as_str());
     }
 }
 
@@ -29,7 +35,8 @@ impl BNEmitter for X86X64LinuxEmitter
 {
     fn emit_setup(&mut self)
     {
-        self.dest.push("section .data\n\ttape times 30000 db 0\n\nsection .text\n\tglobal _start\n\n_start:\n\tlea rsi, [rel tape]\n\tmov byte [rsi], 0\n\n");
+        self.dest.push(format!("section .data\n\ttape times {0} db 0\n\nsection .text\n\tglobal _start\n\n_start:\n\tlea rbx, [rel tape]\n\txor rsp, rsp\n\tlea rsi, [rbx + rsp]\n\tmov byte [rsi], 0\n\n",
+                                        MAX_PROGRAM_BYTES).as_str());
     }
 
     fn emit_arithmetic(&mut self, node: &Node)
@@ -39,16 +46,21 @@ impl BNEmitter for X86X64LinuxEmitter
             Node::Sub(value) => self.dest.push(format!("\tsub byte [rsi], {}\n", value).as_str()),
             _ => panic!("Node found that was not Add or Sub")
         }
-        self.emit_wrap();
+        self.emit_arithmetic_wrap();
     }
 
     fn emit_shift(&mut self, node: &Node)
     {
         match *node {
-            Node::Right(value) => self.dest.push(format!("\tadd rsi, {}\n", value).as_str()),
-            Node::Left(value) => self.dest.push(format!("\tsub rsi, {}\n", value).as_str()),
+            Node::Right(value) => {
+                self.dest.push(format!("\tadd rsp, {}\n", value).as_str());
+            },
+            Node::Left(value) => {
+                self.dest.push(format!("\tsub rsp, {}\n", value).as_str());
+            },
             _ => panic!("Node found that was not Right or Left")
         }
+        self.emit_shift_wrap();
     }
 
     fn emit_jump(&mut self, node: &Node) -> Option<usize>
@@ -57,8 +69,8 @@ impl BNEmitter for X86X64LinuxEmitter
             Node::JumpIfZero(_value) => {
                 self.loop_count += 1;
                 self.loop_stack.push(self.loop_count);
-                self.dest.push("\tcmp byte [rsi], 0\n");
                 self.dest.push(format!("LS_{}:\n", self.loop_count).as_str());
+                self.dest.push("\tcmp byte [rsi], 0\n");
                 self.dest.push(format!("\tjz LE_{}\n", self.loop_count).as_str());
             },
             Node::JumpIfNotZero(_value) => {

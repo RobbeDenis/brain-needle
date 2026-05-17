@@ -2,6 +2,7 @@
 mod common;
 
 use common::*;
+use brain_needle::bncore::MAX_PROGRAM_BYTES;
 
 const CTX: TargetContext = TargetContext {
         os:     TargetOS::Linux, 
@@ -21,10 +22,11 @@ fn wrap_right()
         };
         
         use Node::*;
+        let max = MAX_PROGRAM_BYTES as u16;
         let tree: Vec<Node> = vec![
-            Add(64), Right(30000), Out,
-            Add(20), Right(15000), Add(80), Out,
-            Right(15001), Sub(20), Out,
+            Add(64), Right(max), Out,
+            Add(20), Right(max / 2), Add(80), Out,
+            Right((max / 2) + 1), Sub(20), Out,
             Left(1), Out
         ];
 
@@ -50,10 +52,11 @@ fn wrap_left()
         };
         
         use Node::*;
+        let max = MAX_PROGRAM_BYTES as u16;
         let tree: Vec<Node> = vec![
-            Add(64), Left(30000), Out,
-            Add(20), Left(15000), Add(80), Out,
-            Left(15001), Sub(20), Out,
+            Add(64), Left(max), Out,
+            Add(20), Left(max / 2), Add(80), Out,
+            Left((max / 2) + 1), Sub(20), Out,
             Right(1), Out
         ];
 
