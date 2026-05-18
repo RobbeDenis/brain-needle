@@ -53,17 +53,20 @@ where T: Iterator<Item = io::Result<u8>>
         if *byte == value {
             if count >= USeq::MAX {
                 return Err(format!(
-                    "Maximum allowed of identical tokens in sequence has been reached\nmax: {}\n current: {} {} tokens", 
-                    USeq::MAX, 
-                    count, 
+                    "Maximum allowed of identical tokens in sequence has been reached\nmax: {}\n current: {} {} tokens",
+                    USeq::MAX,
+                    count,
                     value as char)
                     .into());
             }
             count += 1;
             reader.next();
-        } else {
-            break;
-        }
+        } 
+        else {
+            match *byte {
+            ADD|SUB|RIGHT|LEFT|LOOP|BACK|OUT|IN => break,
+            _ => { reader.next(); }
+        }}
     }
 
     return Ok(count);
