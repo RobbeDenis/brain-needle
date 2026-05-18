@@ -11,7 +11,7 @@ use crate::bnctx::OutputDest;
 
 pub trait BNDest
 {
-    fn push(&mut self, data: &str);
+    fn push(&mut self, data: &[u8]);
     fn finalize(&self);
 }
 

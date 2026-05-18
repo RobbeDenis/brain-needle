@@ -1,4 +1,6 @@
 
+use std::io::Read;
+
 // using
 use crate::bncore::MAX_PROGRAM_BYTES;
 use crate::bncore::BYTE_CEIL_WRAP_U8;
@@ -76,13 +78,14 @@ impl BNEmitter for InterpretedEmitter
 
     fn emit_out(&mut self)
     {
-        let c = (self.cells[self.ptr_idx] as char).to_string();
-        self.dest.push(&c);
+        self.dest.push(&[self.cells[self.ptr_idx]]);
     }
 
     fn emit_in(&mut self)
     {
-        self.dest.push("[input]");
+        let stdin = std::io::stdin().lock();
+        let byte = stdin.bytes().next().and_then(|b| b.ok()).unwrap();
+        self.cells[self.ptr_idx] = byte;
     }
 
     fn emit_exit(&mut self)

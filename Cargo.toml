@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 ansi_term = "0.12.1"
+#crossterm = "0.29.0"
 
 [features]
 args = []

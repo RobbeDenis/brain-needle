@@ -23,9 +23,11 @@ impl FileDest
 
 impl BNDest for FileDest
 {
-    fn push(&mut self, data: &str)
+    fn push(&mut self, data: &[u8])
     {
-        self.output += data;
+        if let Ok(s) = std::str::from_utf8(data) {
+        self.output.push_str(s);
+    }
     }
 
     fn finalize(&self)

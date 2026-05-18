@@ -75,9 +75,11 @@ impl TestPubDest
 
 impl BNDest for TestPubDest
 {
-    fn push(&mut self, data: &str)
+    fn push(&mut self, data: &[u8])
     {
-        self.output.borrow_mut().push_str(data);
+        if let Ok(s) = std::str::from_utf8(data) {
+            self.output.borrow_mut().push_str(s);
+        }
     }
 
     fn finalize(&self)

@@ -22,12 +22,12 @@ impl X86X64LinuxEmitter
 
     fn emit_arithmetic_wrap(&mut self)
     {
-        self.dest.push(format!("\tand byte [rsi], {}\n", BYTE_CEIL_WRAP_U8 - 1).as_str());
+        self.dest.push(format!("\tand byte [rsi], {}\n", BYTE_CEIL_WRAP_U8 - 1).as_bytes());
     }
 
     fn emit_shift_wrap(&mut self)
     {
-        self.dest.push(format!("\tand rsp, {}\n\tlea rsi, [rbx + rsp]\n", MAX_PROGRAM_BYTES - 1).as_str());
+        self.dest.push(format!("\tand rsp, {}\n\tlea rsi, [rbx + rsp]\n", MAX_PROGRAM_BYTES - 1).as_bytes());
     }
 }
 
@@ -36,14 +36,14 @@ impl BNEmitter for X86X64LinuxEmitter
     fn emit_setup(&mut self)
     {
         self.dest.push(format!("section .data\n\ttape times {0} db 0\n\nsection .text\n\tglobal _start\n\n_start:\n\tlea rbx, [rel tape]\n\txor rsp, rsp\n\tlea rsi, [rbx + rsp]\n\tmov byte [rsi], 0\n\n",
-                                        MAX_PROGRAM_BYTES).as_str());
+                                        MAX_PROGRAM_BYTES).as_bytes());
     }
 
     fn emit_arithmetic(&mut self, node: &Node)
     {
         match *node {
-            Node::Add(value) => self.dest.push(format!("\tadd byte [rsi], {}\n", value).as_str()),
-            Node::Sub(value) => self.dest.push(format!("\tsub byte [rsi], {}\n", value).as_str()),
+            Node::Add(value) => self.dest.push(format!("\tadd byte [rsi], {}\n", value).as_bytes()),
+            Node::Sub(value) => self.dest.push(format!("\tsub byte [rsi], {}\n", value).as_bytes()),
             _ => panic!("Node found that was not Add or Sub")
         }
         self.emit_arithmetic_wrap();
@@ -53,10 +53,10 @@ impl BNEmitter for X86X64LinuxEmitter
     {
         match *node {
             Node::Right(value) => {
-                self.dest.push(format!("\tadd rsp, {}\n", value).as_str());
+                self.dest.push(format!("\tadd rsp, {}\n", value).as_bytes());
             },
             Node::Left(value) => {
-                self.dest.push(format!("\tsub rsp, {}\n", value).as_str());
+                self.dest.push(format!("\tsub rsp, {}\n", value).as_bytes());
             },
             _ => panic!("Node found that was not Right or Left")
         }
@@ -69,14 +69,14 @@ impl BNEmitter for X86X64LinuxEmitter
             Node::JumpIfZero(_value) => {
                 self.loop_count += 1;
                 self.loop_stack.push(self.loop_count);
-                self.dest.push(format!("LS_{}:\n", self.loop_count).as_str());
-                self.dest.push("\tcmp byte [rsi], 0\n");
-                self.dest.push(format!("\tjz LE_{}\n", self.loop_count).as_str());
+                self.dest.push(format!("LS_{}:\n", self.loop_count).as_bytes());
+                self.dest.push(b"\tcmp byte [rsi], 0\n");
+                self.dest.push(format!("\tjz LE_{}\n", self.loop_count).as_bytes());
             },
             Node::JumpIfNotZero(_value) => {
                 let idx = self.loop_stack.pop().unwrap();
-                self.dest.push(format!("\tjmp LS_{}\n", idx).as_str());
-                self.dest.push(format!("LE_{}:\n", idx).as_str());
+                self.dest.push(format!("\tjmp LS_{}\n", idx).as_bytes());
+                self.dest.push(format!("LE_{}:\n", idx).as_bytes());
             },
             _ => panic!("Node found that was not Jump")
         }
@@ -89,7 +89,7 @@ impl BNEmitter for X86X64LinuxEmitter
         // rax << 1 => sys_write
         // rdi << 1 => stdout
         // rdx << 1 => length
-        self.dest.push("\tmov rax, 1\n\tmov rdi, 1\n\tmov rdx, 1\n\tsyscall\n\n");
+        self.dest.push(b"\tmov rax, 1\n\tmov rdi, 1\n\tmov rdx, 1\n\tsyscall\n\n");
     }
     
     fn emit_in(&mut self)
@@ -97,12 +97,12 @@ impl BNEmitter for X86X64LinuxEmitter
         // rax << 0 => sys_read
         // rdi << 0 => stdin
         // rdx << 1 => length
-        self.dest.push("\txor rax, rax\n\txor rdi, rdi\n\tmov rdx, 1\n\tsyscall\n\n");
+        self.dest.push(b"\txor rax, rax\n\txor rdi, rdi\n\tmov rdx, 1\n\tsyscall\n\n");
     }
     
     fn emit_exit(&mut self)
     {
-        self.dest.push("\tmov rax, 60\n\txor rdi, rdi\n\tsyscall\n");
+        self.dest.push(b"\tmov rax, 60\n\txor rdi, rdi\n\tsyscall\n");
     }
 
     fn finalize(&mut self) 
