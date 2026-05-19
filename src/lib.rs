@@ -1,5 +1,6 @@
 
 pub mod bncore;
+pub mod bnconfig;
 pub mod bnctx;
 pub mod bndest;
 pub mod bnemit;

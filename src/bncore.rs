@@ -52,24 +52,3 @@ pub const DEFAULT_BF_PATH: &str = "src-bf\\hello.bf";
 pub const DEFAULT_OUT_DIR: &str = "output";
 #[allow(unused)]
 pub const DEFAULT_OUT_FILE: &str = "hello.asm";
-
-pub struct Config 
-{
-    pub file_path: std::path::PathBuf
-}
-
-impl Config
-{
-    pub fn build(args: &[String]) -> Result<Config, &'static str> 
-    {
-        let mut path = std::path::PathBuf::from(DEFAULT_BF_DIR);
-
-        if args.len() > 1 {
-            path.push(args[1].trim());
-        } else {
-            path.push(DEFAULT_BF_FILE);
-        }
-
-        return Ok(Config { file_path: path });
-    }
-}

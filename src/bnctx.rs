@@ -1,7 +1,8 @@
 
-use std::path::PathBuf;
+use std::{path::PathBuf};
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub enum AsmFlavor
 {
     NASM,
@@ -9,6 +10,7 @@ pub enum AsmFlavor
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub enum Language
 {
     C,
@@ -16,6 +18,7 @@ pub enum Language
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub enum TargetOS
 {
     Windows,
@@ -24,6 +27,7 @@ pub enum TargetOS
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub enum Architecture
 {
     X86_64,
@@ -31,6 +35,7 @@ pub enum Architecture
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub enum OutputFormat
 {
     Assembly(AsmFlavor),
@@ -40,7 +45,7 @@ pub enum OutputFormat
 }
 
 #[allow(dead_code)]
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum OutputDest
 {
     File(Option<PathBuf>),
@@ -49,10 +54,24 @@ pub enum OutputDest
 }
 
 #[allow(dead_code)]
+#[derive(Debug)]
 pub struct TargetContext
 {
     pub dest: OutputDest,
     pub format: OutputFormat,
     pub os: TargetOS,
     pub arch: Architecture
+}
+
+impl TargetContext
+{
+    pub const fn default() -> TargetContext
+    {
+        return TargetContext { 
+            dest: OutputDest::File(Some(PathBuf::new())),
+            format: OutputFormat::Assembly(AsmFlavor::NASM), 
+            os: TargetOS::Linux, 
+            arch: Architecture::X86_64 
+        };
+    }
 }
