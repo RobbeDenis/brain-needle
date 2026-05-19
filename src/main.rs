@@ -34,10 +34,7 @@ fn parsed_config() -> brain_needle::bnconfig::Config
 {
     use brain_needle::bnconfig::*;
 
-    let args = Args::parse_from_env().unwrap_or_else(|err| {
-        println!("Argument parser error: {err}");
-        std::process::exit(1);
-    });
+    let args = Args::parse_from_env();
     println!("{:?}", args);
     
     let config = Config::build(&args).unwrap_or_else(|err| {
