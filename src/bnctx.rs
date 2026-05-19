@@ -2,7 +2,7 @@
 use std::{path::PathBuf};
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum AsmFlavor
 {
     NASM,
@@ -10,7 +10,7 @@ pub enum AsmFlavor
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Language
 {
     C,
@@ -18,7 +18,7 @@ pub enum Language
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum TargetOS
 {
     Windows,
@@ -27,7 +27,7 @@ pub enum TargetOS
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Architecture
 {
     X86_64,
@@ -35,7 +35,7 @@ pub enum Architecture
 }
 
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum OutputFormat
 {
     Assembly(AsmFlavor),
