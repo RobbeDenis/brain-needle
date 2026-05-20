@@ -11,20 +11,24 @@ The reason for making this project is to familiarise myself with rust and learn 
 - Output destination [`src/bndest.rs`](src/bndest.rs)
     - [stdout](src/bndest/bndest_stdout.rs)
     - [file](src/bndest/bndest_file.rs)
-- Unit testing framework for validating output [`tests/`](tests/)
-    - NASM tests still have to be implemented
-- Partial argument parser [`src/bnconfig.rs`](src/bnconfig.rs)
+- Unit testing helpers for validating output [`tests/`](tests/)
+    - Only interpreter has complete unit tests, NASM tests still have to be implemented
+- Argument parser and config builder [`src/bnconfig.rs`](src/bnconfig.rs)
 
-## Arguments
+## Usage
 ```terminal
-Usage: [INPUT_FILE | -h | --help] [FLAGS]
+Usage: [INPUT | -h | --help] [OPTIONS]
 
-FLAGS:
-  -o, --out  <OUTPUT>             Specify output file path
-  -d, --dest <DEST>               Specify destination type
-              file                Writes the output to a file
-              stdout              Writes the output using stdout
-  -f, --fmt  <FORMAT>             Specify output format
+Options:
+  -o, --out  <OUTPUT>             Specify output file path [default: INPUT.*]
+  -d, --dest <DEST>               Specify destination output type [default: stdout]
+              stdout              Writes using stdout
+              file                Writes to a file
+  -f, --fmt  <FORMAT>             Specify output format [default: interpret]
+              interpret           Directly interprets and writes brainfuck to the output
               nasm                Compiles brainfuck to NASM
-              interpret           Directly interprets brainfuck and writes to the output
+  -a, --arch <ARCH>               Specify target architecture [default: x86_64]
+              x86-64              Uses the x86-64 AMD/Intel instruction set
+  -t, --os   <OS>                 Specify target operating system [default: linux]
+              linux               Uses linux system calls
 ```
