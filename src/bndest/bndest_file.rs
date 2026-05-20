@@ -10,7 +10,7 @@ use std::path::PathBuf;
 pub struct FileDest
 {
     output: String,
-    path: Option<PathBuf> // TODO replace with an actual file
+    path: Option<PathBuf>
 }
 
 impl FileDest

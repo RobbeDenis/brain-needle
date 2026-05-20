@@ -4,20 +4,29 @@ fn main()
 {
     use brain_needle::*;
     use bnemit::BNEmitterFactoryDefault;
+    use bninter::generate_intermediate;
 
-    let config = build_config();
-
-    let tokens = bnlex::tokenize_file_from_path(config.file_path).unwrap_or_else(|err| {
-        println!("Lexer error: {err}");
+    let file_path = std::path::PathBuf::from("src-bf\\test\\wrap_pos.bf");
+    let output = generate_intermediate(&file_path).unwrap_or_else(|err| {
+        println!("{err}");
         std::process::exit(1);
     });
 
-    let flat_instr_tree = bnparse::create_flat_instr_tree_from_tokens(tokens).unwrap_or_else(|err| {
-        println!("Parsing error: {err}");
-        std::process::exit(1);
-    });
+    println!("{:?}", output);
 
-    bngen::generate_output::<BNEmitterFactoryDefault>(flat_instr_tree, config.context);
+    // let config = build_config();
+
+    // let tokens = bnlex::tokenize_file_from_path(config.file_path).unwrap_or_else(|err| {
+    //     println!("Lexer error: {err}");
+    //     std::process::exit(1);
+    // });
+
+    // let flat_instr_tree = bnparse::create_flat_instr_tree_from_tokens(tokens).unwrap_or_else(|err| {
+    //     println!("Parsing error: {err}");
+    //     std::process::exit(1);
+    // });
+
+    // bngen::generate_output::<BNEmitterFactoryDefault>(flat_instr_tree, config.context);
 }
 
 fn build_config() -> brain_needle::bnconfig::Config
