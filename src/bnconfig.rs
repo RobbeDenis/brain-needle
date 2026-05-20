@@ -14,6 +14,8 @@ pub struct Args
     pub output_file: PathBuf,
     pub output_format: String,
     pub dest_type: String,
+    pub target_arch: String,
+    pub target_os: String,
 }
 
 impl Args
@@ -33,7 +35,7 @@ impl Args
             std::process::exit(1);
         }
         else if args.len() == 1 {
-            eprintln!("Argument parser error: missing first argument\nUsage: [INPUT_FILE | -h | --help] [FLAGS]");
+            eprintln!("Argument parser error: missing first argument\nUsage: [INPUT | -h | --help] [OPTIONS]");
             std::process::exit(1);
         }
 
@@ -58,25 +60,39 @@ impl Args
                     match args_iter.next() {
                         Some(value) => parsed_args.dest_type = value.into(),
                         _ => {
-                            eprintln!("Argument parser error: The flag '{}' requires a destination type", arg);
+                            eprintln!("Argument parser error: The option '{}' requires a destination type", arg);
                             std::process::exit(1);
             }}}
                 "-o" | "--out" => {
                     match args_iter.next() {
                         Some(value) => parsed_args.output_file = value.into(),
                         _ => {
-                            eprintln!("Argument parser error: The flag '{}' requires an output file path", arg);
+                            eprintln!("Argument parser error: The option '{}' requires an output file path", arg);
                             std::process::exit(1);
             }}}
                 "-f" | "--fmt" => {
                     match args_iter.next() {
                         Some(value) => parsed_args.output_format = value.into(),
                         _ => {
-                            eprintln!("Argument parser error: The flag '{}' requires an output format", arg);
+                            eprintln!("Argument parser error: The option '{}' requires an output format", arg);
+                            std::process::exit(1);
+            }}}
+                "-a" | "--arch" => {
+                    match args_iter.next() {
+                        Some(value) => parsed_args.target_arch = value.into(),
+                        _ => {
+                            eprintln!("Argument parser error: The option '{}' requires a specified architecture", arg);
+                            std::process::exit(1);
+            }}}
+                "-t" | "--os" => {
+                    match args_iter.next() {
+                        Some(value) => parsed_args.target_os = value.into(),
+                        _ => {
+                            eprintln!("Argument parser error: The option '{}' requires a specified operating system", arg);
                             std::process::exit(1);
             }}}
                 _ => { 
-                    eprintln!("Argument parser error: Unknown flag: {}", arg);
+                    eprintln!("Argument parser error: Unknown option: {}", arg);
                     std::process::exit(1);
         }}}
 
@@ -86,18 +102,24 @@ impl Args
 
 fn print_help() 
 {
-    println!("\nUsage: [INPUT_FILE | -h | --help] [FLAGS]");
-    println!("\nFLAGS:");
+    println!("\nUsage: [INPUT | -h | --help] [OPTIONS]");
+    println!("\nOptions:");
 
-    println!("  -o, --out  <OUTPUT>\t\t  Specify output file path");
+    println!("  -o, --out  <OUTPUT>\t\t  Specify output file path [default: INPUT.*]");
 
-    println!("  -d, --dest <DEST> \t\t  Specify destination type");
-    println!("              file   \t\t  Writes the output to a file");
-    println!("              stdout \t\t  Writes the output using stdout");
+    println!("  -d, --dest <DEST> \t\t  Specify destination output type [default: stdout]");
+    println!("              stdout \t\t  Writes using stdout");
+    println!("              file   \t\t  Writes to a file");
 
-    println!("  -f, --fmt  <FORMAT>\t\t  Specify output format");
+    println!("  -f, --fmt  <FORMAT>\t\t  Specify output format [default: interpret]");
+    println!("              interpret\t\t  Directly interprets and writes brainfuck to the output");
     println!("              nasm    \t\t  Compiles brainfuck to NASM");
-    println!("              interpret\t\t  Directly interprets brainfuck and writes to the output");
+
+    println!("  -a, --arch <ARCH>\t\t  Specify target architecture [default: x86_64]");
+    println!("              x86-64\t\t  Uses the x86-64 AMD/Intel instruction set");
+
+    println!("  -t, --os   <OS>\t\t  Specify target operating system [default: linux]");
+    println!("              linux\t\t  Uses linux system calls");
 
     println!("");
 }
@@ -137,6 +159,16 @@ impl Config
             _ => ctx.dest = OutputDest::Stdout
         }
 
+        match args.target_arch.as_str() {
+            "x86-64" => ctx.arch = Architecture::X86_64,
+            _ => ctx.arch = Architecture::X86_64
+        }
+
+        match args.target_os.as_str() {
+            "linux" => ctx.os = TargetOS::Linux,
+            _ => ctx.os = TargetOS::Linux
+        }
+
         return Config { file_path: path, context: ctx };
     }
 }
@@ -161,33 +193,41 @@ mod parse_tests
     use super::*;
 
     #[test]
-    fn parse_short_flags()
+    fn parse_short_options()
     {
-        let args:Vec<String>= vec!["program", "input.bf", "-o", "output", "-d", "stdout", "-f", "nasm"]
+        let args:Vec<String>= vec![
+            "caller", "input.bf", "-o", "output", "-d", "stdout", "-f", 
+            "nasm", "-a", "x86-64", "-t", "linux"]
             .into_iter()
             .map(String::from)
             .collect();
 
         let args = Args::parse_from_args(args);
-        assert!(args.caller == "program");
+        assert!(args.caller == "caller");
         assert!(args.input_file == PathBuf::from("input.bf"));
         assert!(args.dest_type == "stdout");
         assert!(args.output_format == "nasm");
+        assert!(args.target_arch == "x86-64");
+        assert!(args.target_os == "linux");
     }
     
     #[test]
-    fn parse_long_flags()
+    fn parse_long_options()
     {
-        let args:Vec<String>= vec!["program", "input.bf", "--out", "output", "--dest", "stdout", "--fmt", "nasm"]
+        let args:Vec<String>= vec![
+            "caller", "input.bf", "--out", "output", "--dest", "stdout", 
+            "--fmt", "nasm", "--arch", "x86-64", "--os", "linux"]
         .into_iter()
         .map(String::from)
         .collect();
     
         let args = Args::parse_from_args(args);
-        assert!(args.caller == "program");
+        assert!(args.caller == "caller");
         assert!(args.input_file == PathBuf::from("input.bf"));
         assert!(args.dest_type == "stdout");
         assert!(args.output_format == "nasm");
+        assert!(args.target_arch == "x86-64");
+        assert!(args.target_os == "linux");
     }
 }
 
@@ -214,6 +254,8 @@ mod config_tests
         assert!(config.file_path == args.input_file);
         assert!(config.context.dest == OutputDest::Stdout);
         assert!(config.context.format == OutputFormat::Interpreted);
+        assert!(config.context.arch == Architecture::X86_64);
+        assert!(config.context.os == TargetOS::Linux);
 
         // check for default output file name
         args.dest_type = "file".into();
@@ -222,6 +264,8 @@ mod config_tests
         let expected = OutputDest::File(Some(PathBuf::from("input.txt")));
         assert!(config.context.dest == expected, "OutputDest mismatch\nExpected: {:?}\nActual:   {:?}\n", expected, config.context.dest);
         assert!(config.context.format == OutputFormat::Interpreted);
+        assert!(config.context.arch == Architecture::X86_64);
+        assert!(config.context.os == TargetOS::Linux);
     }
     
     #[test]
@@ -231,14 +275,18 @@ mod config_tests
             caller: "caller".into(),
             input_file: PathBuf::from("input.bf"),
             output_file: "test".into(),
-            dest_type: "stdout".into(),
             output_format: "interpret".into(),
+            dest_type: "stdout".into(),
+            target_arch: "x86-64".into(),
+            target_os: "linux".into(),
         };
 
         let config = Config::build(&args);
         assert!(config.file_path == args.input_file);
         assert!(config.context.dest == OutputDest::Stdout);
         assert!(config.context.format == OutputFormat::Interpreted);
+        assert!(config.context.arch == Architecture::X86_64);
+        assert!(config.context.os == TargetOS::Linux);
         
         args.dest_type = "file".into();
         args.output_format = "nasm".into();
@@ -247,5 +295,7 @@ mod config_tests
         assert!(config.file_path == args.input_file);
         assert!(config.context.dest == OutputDest::File(Some(PathBuf::from("test"))));
         assert!(config.context.format == OutputFormat::Assembly(AsmFlavor::NASM));
+        assert!(config.context.arch == Architecture::X86_64);
+        assert!(config.context.os == TargetOS::Linux);
     }
 }
