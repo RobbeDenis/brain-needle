@@ -2,6 +2,10 @@
 use std::{env, path::PathBuf};
 use crate::bnctx::*;
 
+//////////////////////////
+/////// Arguments ////////
+//////////////////////////
+
 #[derive(Debug, Default)]
 pub struct Args
 {
@@ -14,6 +18,9 @@ pub struct Args
 
 impl Args
 {
+    // Argument parsing is divided into parse_from_env and parse_from_args
+    // parse_from_env is the main method of parsing the given arguments,
+    // while parse_from_args is ment for specific test cases
     pub fn parse_from_env() -> Args
     {
         return Self::parse_from_args(env::args().collect());
@@ -95,6 +102,10 @@ fn print_help()
     println!("");
 }
 
+//////////////////////////
+///////// Config /////////
+//////////////////////////
+
 #[derive(Debug)]
 pub struct Config
 {
@@ -119,7 +130,7 @@ impl Config
             "stdout" => ctx.dest = OutputDest::Stdout,
             "file" => {
                 if args.output_file.as_os_str().is_empty() {
-                    ctx.dest = OutputDest::File(Some("output".into()))
+                    ctx.dest = OutputDest::File(Some(path.with_extension(create_extension(&ctx.format))));
                 } else {
                     ctx.dest = OutputDest::File(Some(args.output_file.clone()))
             }},
@@ -127,6 +138,16 @@ impl Config
         }
 
         return Config { file_path: path, context: ctx };
+    }
+}
+
+/// create extension based on [`OutputFormat`]
+fn create_extension(format: &OutputFormat) -> &str
+{
+    match format {
+        OutputFormat::Interpreted => "txt",
+        OutputFormat::Assembly(AsmFlavor::NASM) => "asm",
+        _ => ""
     }
 }
 
@@ -198,7 +219,8 @@ mod config_tests
         args.dest_type = "file".into();
         let config = Config::build(&args);
         assert!(config.file_path == args.input_file);
-        assert!(config.context.dest == OutputDest::File(Some(PathBuf::from("output")))); // TODO make default output the name of input with fitting extension
+        let expected = OutputDest::File(Some(PathBuf::from("input.txt")));
+        assert!(config.context.dest == expected, "OutputDest mismatch\nExpected: {:?}\nActual:   {:?}\n", expected, config.context.dest);
         assert!(config.context.format == OutputFormat::Interpreted);
     }
     
