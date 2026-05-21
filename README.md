@@ -3,20 +3,20 @@ Brain-needle is a brainfuck interpreter and compiler for x86-64 assembly.
 The reason for making this project is to learn some rust and the basics of creating a modular compiler.
 
 ## Implemented
-- Tokenization [`src/bnlex.rs`](src/bnlex.rs)
-- Parsing to Flat AST [`src/bnparse.rs`](src/bnparse.rs)
-- Code generation [`src/bngen.rs`](src/bngen.rs)
+- Tokenization [`bnlex.rs`](src/bnlex.rs)
+- Parsing to Flat AST [`bnparse.rs`](src/bnparse.rs)
+- Code generation [`bngen.rs`](src/bngen.rs)
     - [x86-64 linux](src/bnemit/bnemit_x86_64_linux.rs)
     - [interpreted](src/bnemit/bnemit_interpreted.rs)
-- Output destination [`src/bndest.rs`](src/bndest.rs)
+- Output destination [`bndest.rs`](src/bndest.rs)
     - [stdout](src/bndest/bndest_stdout.rs)
     - [file](src/bndest/bndest_file.rs)
-- Unit testing helpers for validating output [`tests/`](tests/)
-    - Only interpreter has complete unit tests, NASM tests still have to be implemented
-- Argument parser and config builder [`src/bnconfig.rs`](src/bnconfig.rs)
+- Unit testing for validating generated output [`tests/`](tests/)
+    - Only interpreter output has validation tests, assembly tests will be added after the first optimization passes have been implemented.
+- Argument parser and config builder [`bnconfig.rs`](src/bnconfig.rs)
 
 ## Currently working on
-Replacing the lexer [`bnlex.rs`](src/bnlex.rs) and parser [`bnparse.rs`](src/bnparse.rs) into a Flat IR generator [`src/bnintrep.rs`](src/bnintrep.rs).
+Replacing the lexer [`bnlex.rs`](src/bnlex.rs) and parser [`bnparse.rs`](src/bnparse.rs) into a Flat IR generator [`bnintrep.rs`](src/bnintrep.rs).
 The goal is to create the simplest representation of the code in a single pass, before applying optional optimization passes.
 
 ## Usage
