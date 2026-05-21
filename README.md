@@ -1,6 +1,6 @@
 # brain-needle
 Brain-needle is a brainfuck interpreter and compiler for x86-64 assembly.
-The reason for making this project is to familiarise myself with rust and learn the basics of creating a modular basic compiler.
+The reason for making this project is to learn some rust and the basics of creating a modular compiler.
 
 ## Implemented
 - Tokenization [`src/bnlex.rs`](src/bnlex.rs)
@@ -14,6 +14,10 @@ The reason for making this project is to familiarise myself with rust and learn 
 - Unit testing helpers for validating output [`tests/`](tests/)
     - Only interpreter has complete unit tests, NASM tests still have to be implemented
 - Argument parser and config builder [`src/bnconfig.rs`](src/bnconfig.rs)
+
+## Currently working on
+Replacing the lexer [`bnlex.rs`](src/bnlex.rs) and parser [`bnparse.rs`](src/bnparse.rs) into a Flat IR generator [`src/bnintrep.rs`](src/bnintrep.rs).
+The goal is to create the simplest representation of the code in a single pass, before applying optional optimization passes.
 
 ## Usage
 ```terminal
