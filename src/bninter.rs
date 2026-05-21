@@ -117,6 +117,7 @@ const LOOPEND: u8   = b']';
 const OUT: u8       = b'.';
 const IN: u8        = b',';
 
+#[derive(Debug, PartialEq)]
 pub enum BNToken {
     Add,
     Sub,
@@ -148,6 +149,31 @@ impl TokenMatcherTrait for BNTokenMatcher
             IN      => BNToken::In,
             OUT     => BNToken::Out,
             _       => BNToken::None
+        }
+    }
+}
+
+#[cfg(test)]
+mod token_matcher_tests
+{
+    use super::*;
+    use crate::bn_assert_eq;
+
+    #[test]
+    fn base_tokens()
+    {
+        for byte in 0..255 {
+            match byte {
+                ADD     => bn_assert_eq!(BNToken::Add, BNTokenMatcher::match_token(byte)),
+                SUB     => bn_assert_eq!(BNToken::Sub, BNTokenMatcher::match_token(byte)),
+                RIGHT   => bn_assert_eq!(BNToken::Right, BNTokenMatcher::match_token(byte)),
+                LEFT    => bn_assert_eq!(BNToken::Left, BNTokenMatcher::match_token(byte)),
+                LOOP    => bn_assert_eq!(BNToken::Loop, BNTokenMatcher::match_token(byte)),
+                LOOPEND => bn_assert_eq!(BNToken::LoopEnd, BNTokenMatcher::match_token(byte)),
+                IN      => bn_assert_eq!(BNToken::In, BNTokenMatcher::match_token(byte)),
+                OUT     => bn_assert_eq!(BNToken::Out, BNTokenMatcher::match_token(byte)),
+                _       => bn_assert_eq!(BNToken::None, BNTokenMatcher::match_token(byte)),
+            }
         }
     }
 }

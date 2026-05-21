@@ -1,5 +1,39 @@
 
 ////////////////////////////
+////    assert macros   ////
+////////////////////////////
+
+#[macro_export]
+macro_rules! bn_assert_eq {
+    ($expected:expr, $found:expr) => {{
+        let ident = {
+            fn f() {}
+            fn type_name_of<T>(_: T) -> &'static str {
+                std::any::type_name::<T>()
+            }
+            let name = type_name_of(f);
+            name.strip_suffix("::f").unwrap()
+        };
+        bn_assert_eq!(ident, $expected, $found);
+    }};
+    ($ident:expr, $expected:expr, $found:expr) => {{
+        let exp = $expected;
+        let fnd = $found;
+        if exp != fnd {
+            use ansi_term::Color::{Green, Red, Yellow};
+            
+            panic!(
+                "\nTest failed at {}\n{}\n{}: {:?}\n{}: {:?}\n",
+                format!("{}", format!("{}:{}:{}:", file!(), line!(), column!())),
+                Yellow.bold().paint(format!("[{}]", $ident)),
+                Green.paint("Expected"), exp,
+                Red.paint("   Found"), fnd
+            );
+        }
+    }};
+}
+
+////////////////////////////
 ////  test case macros  ////
 ////////////////////////////
 

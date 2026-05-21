@@ -10,4 +10,4 @@ pub mod bnparse;
 pub mod bninter;
 pub mod bnerror;
 
-mod case_macros;
+mod test_macros;
