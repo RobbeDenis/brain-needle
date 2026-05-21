@@ -4,10 +4,10 @@ fn main()
 {
     use brain_needle::*;
     use bnemit::BNEmitterFactoryDefault;
-    //use bninter::generate_intermediate;
+    //use bninter::generate_intermediate_representaion;
 
     // let file_path = std::path::PathBuf::from("src-bf\\test\\wrap_pos.bf");
-    // let output = generate_intermediate(&file_path).unwrap_or_else(|err| {
+    // let output = generate_intermediate_representaion(&file_path).unwrap_or_else(|err| {
     //     println!("{err}");
     //     std::process::exit(1);
     // });

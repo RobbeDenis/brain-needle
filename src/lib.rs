@@ -7,7 +7,7 @@ pub mod bnemit;
 pub mod bngen;
 pub mod bnlex;
 pub mod bnparse;
-pub mod bninter;
+pub mod bnintrep;
 pub mod bnerror;
 
 mod test_macros;

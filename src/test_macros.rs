@@ -4,31 +4,116 @@
 ////////////////////////////
 
 #[macro_export]
-macro_rules! bn_assert_eq {
-    ($expected:expr, $found:expr) => {{
-        let ident = {
+macro_rules! bn_fnident {
+    () => {
+        {
             fn f() {}
             fn type_name_of<T>(_: T) -> &'static str {
                 std::any::type_name::<T>()
             }
             let name = type_name_of(f);
             name.strip_suffix("::f").unwrap()
-        };
-        bn_assert_eq!(ident, $expected, $found);
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! bn_assert_eq {
+    ($expected:expr, $found:expr, $index:literal) => {{
+        bn_assert_eq!(crate::bn_fnident!(), $expected, $found, $index);
     }};
-    ($ident:expr, $expected:expr, $found:expr) => {{
-        let exp = $expected;
-        let fnd = $found;
+    ($expected:expr, $found:expr) => {{
+        bn_assert_eq!(crate::bn_fnident!(), $expected, $found);
+    }};
+    ($func:expr, $expected:expr, $found:expr) => {{
+        let exp = &$expected;
+        let fnd = &$found;
         if exp != fnd {
             use ansi_term::Color::{Green, Red, Yellow};
-            
             panic!(
                 "\nTest failed at {}\n{}\n{}: {:?}\n{}: {:?}\n",
                 format!("{}", format!("{}:{}:{}:", file!(), line!(), column!())),
-                Yellow.bold().paint(format!("[{}]", $ident)),
+                Yellow.bold().paint(format!("[{}]", $func)),
                 Green.paint("Expected"), exp,
                 Red.paint("   Found"), fnd
             );
+        }
+    }};
+    ($func:expr, $expected:expr, $found:expr, $index:literal) => {{
+        let exp = &$expected;
+        let fnd = &$found;
+        if exp != fnd {
+            use ansi_term::Color::{Green, Red, Yellow};
+            panic!(
+                "\nTest failed at {}\n{}\n{}: {:?} at index {}\n{}: {:?}\n",
+                format!("{}", format!("{}:{}:{}:", file!(), line!(), column!())),
+                Yellow.bold().paint(format!("[{}]", $func)),
+                Green.paint("Expected"), exp, $index,
+                Red.paint("   Found"), fnd
+            );
+        }
+    }};
+}
+
+#[macro_export]
+macro_rules! bn_unwrap {
+    ($result:expr) => {{
+        match $result {
+            Err(err) => {
+                use ansi_term::Color::Yellow;
+                panic!(
+                    "\nTest failed at {}\n{}\n{}\n",
+                    format!("{}", format!("{}:{}:{}:", file!(), line!(), column!())),
+                    Yellow.bold().paint(format!("[{}]", crate::bn_fnident!())),
+                    err
+                );
+            }
+            Ok(value) => value
+        }
+    }};
+}
+
+#[macro_export]
+macro_rules! bn_expect_error {
+    ($result:expr, $error:expr) => {{
+        match $result {
+            Ok(_) => {
+                use ansi_term::Color::{Green, Red, Yellow};
+                panic!(
+                    "\nTest failed at {}\n{}\n{}:\n{}\n{}\n",
+                    format!("{}", format!("{}:{}:{}:", file!(), line!(), column!())),
+                    Yellow.bold().paint(format!("[{}]", crate::bn_fnident!())),
+                    Green.paint("Expected error"), $error,
+                    Red.paint("None was thrown")
+                );
+            }
+            Err(err) => {
+                if err != $error {
+                    use ansi_term::Color::{Green, Red, Yellow};
+                    panic!(
+                        "\nTest failed at {}\n{}\n{}:\n{}\n{}:\n{}\n",
+                        format!("{}", format!("{}:{}:{}:", file!(), line!(), column!())),
+                        Yellow.bold().paint(format!("[{}]", crate::bn_fnident!())),
+                        Green.paint("Expected error"), $error,
+                        Red.paint("Found"), err
+                    );
+                }
+    }}}};
+}
+
+#[macro_export]
+macro_rules! bn_some {
+    ($value:expr) => {{
+        match $value {
+            None => {
+                use ansi_term::Color::Yellow;
+                panic!(
+                    "\nTest failed at {}\n{}\n",
+                    format!("{}", format!("{}:{}:{}:", file!(), line!(), column!())),
+                    Yellow.bold().paint(format!("[{}]", crate::bn_fnident!()))
+                );
+            }
+            Some(v) => v
         }
     }};
 }

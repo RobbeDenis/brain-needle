@@ -6,7 +6,8 @@ use core::fmt;
 pub enum BNError
 {
     Io(std::io::Error),
-    TokenMismatch(String, usize)
+    LoopTokenMismatch,
+    EndLoopTokenMismatch
 }
 
 impl std::fmt::Display for BNError
@@ -15,7 +16,19 @@ impl std::fmt::Display for BNError
     {
         match self {
             BNError::Io(err) => write!(f, "IO error: {}", err),
-            BNError::TokenMismatch(err, index) => write!(f, "Token mismatch at index {index}: {err}")
+            BNError::LoopTokenMismatch => write!(f, "Loop token mismatch: found loop start '[' without matching end ']'"),
+            BNError::EndLoopTokenMismatch => write!(f, "Loop token mismatch: found loop end ']' without matching start '['")
+        }
+    }
+}
+
+impl PartialEq for BNError {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::LoopTokenMismatch, Self::LoopTokenMismatch) => true,
+            (Self::EndLoopTokenMismatch, Self::EndLoopTokenMismatch) => true,
+            (Self::Io(a), Self::Io(b)) => a.kind() == b.kind(),
+            _ => false,
         }
     }
 }
