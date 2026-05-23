@@ -52,3 +52,10 @@ pub const DEFAULT_BF_PATH: &str = "src-bf\\hello.bf";
 pub const DEFAULT_OUT_DIR: &str = "output";
 #[allow(unused)]
 pub const DEFAULT_OUT_FILE: &str = "hello.asm";
+
+#[inline]
+#[must_use = "The reader must be consumed"]
+pub fn create_bnreader<P: AsRef<std::path::Path>>(path: P) -> std::io::BufReader<std::fs::File> {
+    let file = std::fs::File::open(path).unwrap();
+    std::io::BufReader::new(file)
+}// TODO create as a type???

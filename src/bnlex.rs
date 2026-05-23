@@ -1,10 +1,8 @@
 
 use crate::bncore::USeq;
 use crate::bncore::Token;
-use std::fs::File;
 use std::io;
 use std::io::Read;
-use std::path::Path;
 use std::error::Error;
 use std::iter::Peekable;
 
@@ -17,21 +15,19 @@ const BACK: u8    = 93; // ]
 const OUT: u8     = 46; // .
 const IN: u8      = 44; // ,
 
-pub fn tokenize_file_from_path<T: AsRef<Path>>(path: T) -> Result<Vec<Token>, Box<dyn Error>>
+pub fn tokenize_file_from_path<R: Read>(reader: R) -> Result<Vec<Token>, Box<dyn Error>>
 {
     let mut tokens: Vec<Token> = Vec::new();
+    let mut bytes = reader.bytes().peekable();
 
-    let file = File::open(path)?;
-    let mut reader = io::BufReader::new(file).bytes().peekable();
-
-    while let Some(byte) = reader.next() {
+    while let Some(byte) = bytes.next() {
         let value: u8  = byte?;
         
         match value {
-            ADD => tokens.push(Token::Add(get_amount_inseq_consume(value, &mut reader)?)),
-            SUB => tokens.push(Token::Sub(get_amount_inseq_consume(value, &mut reader)?)),
-            RIGHT => tokens.push(Token::Right(get_amount_inseq_consume(value, &mut reader)?)),
-            LEFT => tokens.push(Token::Left(get_amount_inseq_consume(value, &mut reader)?)),
+            ADD => tokens.push(Token::Add(get_amount_inseq_consume(value, &mut bytes)?)),
+            SUB => tokens.push(Token::Sub(get_amount_inseq_consume(value, &mut bytes)?)),
+            RIGHT => tokens.push(Token::Right(get_amount_inseq_consume(value, &mut bytes)?)),
+            LEFT => tokens.push(Token::Left(get_amount_inseq_consume(value, &mut bytes)?)),
             LOOP => tokens.push(Token::Loop),
             BACK => tokens.push(Token::Back),
             OUT => tokens.push(Token::Out),
@@ -85,12 +81,12 @@ mod lexer_tests
     use super::*;
     use crate::hello_world_tokens;
     use crate::bncore::DEFAULT_BF_PATH;
+    use crate::bncore::create_bnreader;
 
     #[test]
     fn print()
     {
-        let path = DEFAULT_BF_PATH;
-        let tokens = tokenize_file_from_path(path).expect("Failed to tokenize the file");
+        let tokens = tokenize_file_from_path(create_bnreader(DEFAULT_BF_PATH)).expect("Failed to tokenize the file");
 
         assert!(!tokens.is_empty(), "[Print Failed]\nToken vector should not be empty");
 
@@ -104,10 +100,9 @@ mod lexer_tests
     #[test]
     fn compare_expected()
     {
-        let path = DEFAULT_BF_PATH;
         let expected_tokens: Vec<Token> = hello_world_tokens!();
 
-        let tokens = tokenize_file_from_path(path).expect("Failed to tokenize the file");
+        let tokens = tokenize_file_from_path(create_bnreader(DEFAULT_BF_PATH)).expect("Failed to tokenize the file");
 
         assert!(
             tokens.len() == expected_tokens.len(),

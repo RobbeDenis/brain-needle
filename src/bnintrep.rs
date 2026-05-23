@@ -1,7 +1,5 @@
 
-use std::path::PathBuf;
-use std::fs::File;
-use std::io::{BufReader, Read};
+use std::{io::Read};
 
 use crate::bnerror::BNError;
 
@@ -9,14 +7,12 @@ use crate::bnerror::BNError;
 //////// GENERATE IR ///////
 ////////////////////////////
 
-pub fn generate_intermediate_representaion(file_path: &PathBuf) -> Result<Vec<BNNode>, BNError>
+pub fn generate_intermediate_representation<R: Read>(reader: R) -> Result<Vec<BNNode>, BNError>
 {
-    let file = File::open(file_path)?;
-    let mut reader = BufReader::new(file).bytes().peekable();
-    
+    let mut bytes = reader.bytes().peekable();
     let mut builder = BNIRBuilder::new();
 
-    while let Some(byte) = reader.next() {
+    while let Some(byte) = bytes.next() {
         let token = BNTokenMatcher::match_token(byte?);
         builder.enter_token(token)?;
     }
@@ -28,16 +24,33 @@ pub fn generate_intermediate_representaion(file_path: &PathBuf) -> Result<Vec<BN
 /////// IR BUILDER ///////
 //////////////////////////
 
-#[derive(Debug, PartialEq)]
+type NodeValue = u16;
+#[derive(Debug, PartialEq, Clone)]
 pub enum BNNode {
-    Add(usize),
-    Sub(usize),
-    Right(usize),
-    Left(usize),
-    Loop(usize),
-    EndLoop(usize),
-    In(usize),
-    Out(usize)
+    Add(NodeValue),
+    Sub(NodeValue),
+    Right(NodeValue),
+    Left(NodeValue),
+    Loop(NodeValue),
+    EndLoop(NodeValue),
+    In(NodeValue),
+    Out(NodeValue),
+    Sentinel(NodeValue)
+}
+
+impl BNNode {
+    #[inline]
+    pub fn increment(&mut self) {
+        match self {
+            BNNode::Add(value) |
+            BNNode::Sub(value) |
+            BNNode::Right(value) |
+            BNNode::Left(value) |
+            BNNode::In(value) |
+            BNNode::Out(value) => *value += 1,
+            _ => { }
+        }
+    }
 }
 
 pub trait IRBuilderTrait {
@@ -48,25 +61,19 @@ pub trait IRBuilderTrait {
 
 pub struct BNIRBuilder {
     nodes: Vec<BNNode>,
-    loop_stack: Vec<usize>,
-    token_sequence: usize,
-    previous_token: BNToken,
+    loop_stack: Vec<NodeValue>
 }
 
 impl BNIRBuilder 
 {
-    fn collapse_previous_token(&mut self)
-    {
-        match self.previous_token {
-            BNToken::Add => self.nodes.push(BNNode::Add(self.token_sequence)),
-            BNToken::Sub => self.nodes.push(BNNode::Sub(self.token_sequence)),
-            BNToken::Right => self.nodes.push(BNNode::Right(self.token_sequence)),
-            BNToken::Left => self.nodes.push(BNNode::Left(self.token_sequence)),
-            BNToken::In => self.nodes.push(BNNode::In(self.token_sequence)),
-            BNToken::Out => self.nodes.push(BNNode::Out(self.token_sequence)),
-            _ => { }
+    #[inline]
+    fn mutate_or_push(&mut self, temp: BNNode) {
+        let last_idx = self.nodes.len() - 1; 
+        if std::mem::discriminant(&self.nodes[last_idx]) == std::mem::discriminant(&temp) {
+            self.nodes[last_idx].increment();
+        } else {
+            self.nodes.push(temp);
         }
-        self.token_sequence = 0;
     }
 }
 
@@ -74,51 +81,49 @@ impl IRBuilderTrait for BNIRBuilder
 {
     fn new() -> Self 
     {
-        return Self{ 
-            nodes: Vec::new(),
-            loop_stack: Vec::new(),
-            previous_token: BNToken::None,
-            token_sequence: 0
+        let mut nodes = Vec::with_capacity(4096);
+        nodes.push(BNNode::Sentinel(0));
+        return Self { 
+            nodes: nodes,
+            loop_stack: Vec::new()
         };
     }
 
     fn enter_token(&mut self, token: BNToken) -> Result<(), BNError>
     {
         match token {
+            BNToken::Add => self.mutate_or_push(BNNode::Add(1)),
+            BNToken::Sub => self.mutate_or_push(BNNode::Sub(1)),
+            BNToken::Right => self.mutate_or_push(BNNode::Right(1)),
+            BNToken::Left => self.mutate_or_push(BNNode::Left(1)),
+            BNToken::In => self.mutate_or_push(BNNode::In(1)),
+            BNToken::Out => self.mutate_or_push(BNNode::Out(1)),
             BNToken::Loop => {
-                self.collapse_previous_token();
-                self.loop_stack.push(self.nodes.len());
+                self.loop_stack.push(self.nodes.len() as NodeValue);
                 self.nodes.push(BNNode::Loop(0));
+                return Ok(());
             },
             BNToken::EndLoop => {
-                self.collapse_previous_token();
                 let index = self.loop_stack.pop().ok_or(BNError::EndLoopTokenMismatch)?;
-                self.nodes[index] = BNNode::Loop(self.nodes.len());
-                self.nodes.push(BNNode::EndLoop(index));
+                // Decrement index because of sentinel node
+                self.nodes[index as usize] = BNNode::Loop(self.nodes.len() as NodeValue - 1);
+                self.nodes.push(BNNode::EndLoop(index as NodeValue - 1));
+                return Ok(());
             },
-            // Early exit because None should never be saved as previous token
-            BNToken::None => return Ok(()),
-            // Collapsing tokens: Add, Sub, Right, Left, In, Out
-            // any other tokens will be ignored in collapse_previous_token
-            _ => {
-                if token != self.previous_token {
-                    self.collapse_previous_token();
-            }}
+            BNToken::None => {
+                return Ok(())
+            }
         }
-        
-        self.token_sequence += 1;
-        self.previous_token = token;
-
         return Ok(());
     }
 
-    fn finalize(mut self) -> Result<Vec<BNNode>, BNError>
+    fn finalize(self) -> Result<Vec<BNNode>, BNError>
     {
-        self.collapse_previous_token();
         if !self.loop_stack.is_empty() {
             return Err(BNError::LoopTokenMismatch);
         }
-        return Ok(self.nodes);
+        // Skip sentinel node
+        return Ok(self.nodes.into_iter().skip(1).collect());
     }
 }
 
@@ -155,6 +160,7 @@ pub trait TokenMatcherTrait {
 struct BNTokenMatcher;
 impl TokenMatcherTrait for BNTokenMatcher
 {
+    #[inline]
     fn match_token(byte: u8) -> BNToken
     {
         match byte {

@@ -15,8 +15,8 @@ fn main()
     // println!("{:?}", output);
 
     let config = build_config();
-
-    let tokens = bnlex::tokenize_file_from_path(config.file_path).unwrap_or_else(|err| {
+    
+    let tokens = bnlex::tokenize_file_from_path(bncore::create_bnreader(&config.file_path)).unwrap_or_else(|err| {
         println!("Lexer error: {err}");
         std::process::exit(1);
     });
