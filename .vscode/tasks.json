@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "cb-mock-config",
+      "type": "shell",
+      "command": "cargo",
+      "args": [
+        "build",
+        "--features",
+        "mock-config"
+      ],
+      "problemMatcher": ["$rustc"]
+    }
+  ]
+}

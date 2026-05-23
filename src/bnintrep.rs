@@ -354,7 +354,7 @@ mod ir_builder_tests
         bn_expect_error!(builder.finalize(), BNError::LoopTokenMismatch);
     }
 
-        #[test]
+    #[test]
     fn end_loop_mismatch_error()
     {
         let mut builder = BNIRBuilder::new();
