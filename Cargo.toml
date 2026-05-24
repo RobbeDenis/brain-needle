@@ -14,5 +14,5 @@ mock-config = []
 bench = false
 
 [[bench]]
-name = "bench_dev"
+name = "benches_main"
 harness = false
