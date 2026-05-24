@@ -2,11 +2,12 @@
 
 mod case_macros;
 
-pub(crate) use brain_needle::bnctx::*;
-pub(crate) use brain_needle::bnemit::BNEmitterFactory;
-pub(crate) use brain_needle::bndest::BNDest;
-pub(crate) use brain_needle::bndest::BNDestFactory;
-pub(crate) use brain_needle::bnintrep::BNNode;
+pub(crate) use brain_needle::*;
+pub(crate) use bnctx::*;
+pub(crate) use bnemit::BNEmitterFactory;
+pub(crate) use bndest::BNDest;
+pub(crate) use bndest::BNDestFactory;
+pub(crate) use bnintrep::BNNode;
 pub(crate) use std::rc::Rc;
 pub(crate) use std::cell::RefCell;
 

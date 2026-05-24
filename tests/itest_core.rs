@@ -9,27 +9,8 @@ const CTX: TargetContext = TargetContext {
         dest:   OutputDest::Custom
     };
 
-// #[test]
-#[allow(unused)]
-fn current_dev()
-{
-    let output = Rc::new(RefCell::new(String::new()));
-    {
-        let mut factory: TestBNEmitterFactory = TestBNEmitterFactory {
-            was_dest_created: false, 
-            output: Rc::clone(&output)
-        };
-        
-        test_generate_output(hello_world_instr_tree!(), CTX, &mut factory);
-    }
-    
-    let output = output.take();
-    print_captured_output!(output, "CURRENT DEV");
-}
-
 #[test]
-fn custom_emit_factory_creation()
-{
+fn custom_emit_factory_creation() {
     let output = Rc::new(RefCell::new(String::new()));
     let mut factory: TestBNEmitterFactory = TestBNEmitterFactory {
         was_dest_created: false, 
