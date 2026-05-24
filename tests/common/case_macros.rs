@@ -21,7 +21,7 @@ macro_rules! print_captured_output {
 #[macro_export]
 macro_rules! hello_world_instr_tree {
     () => {{
-        use brain_needle::bnintrep::BNNode::*;
+        use brain_needle::bnintermediate::BNNode::*;
         vec![
             Add(10),    Loop(12),       Right(1),           Add(1),     Right(1),   // 4
             Add(3),     Right(1),       Add(7),             Right(1),   Add(10),    // 9

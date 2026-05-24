@@ -43,11 +43,11 @@ pub enum Node
 ///////////////////////
 
 #[allow(unused)]
-pub const DEFAULT_BF_DIR: &str = "src-bf";
+pub const DEFAULT_BF_DIR: &str = "bf";
 #[allow(unused)]
 pub const DEFAULT_BF_FILE: &str = "hello.bf";
 #[allow(unused)]
-pub const DEFAULT_BF_PATH: &str = "src-bf\\hello.bf";
+pub const DEFAULT_BF_PATH: &str = "bf\\hello.bf";
 #[allow(unused)]
 pub const DEFAULT_OUT_DIR: &str = "output";
 #[allow(unused)]

@@ -1,7 +1,7 @@
 
 use crate::bnctx::TargetContext;
 use crate::bnemit::*;
-use crate::bnintrep::BNNode;
+use crate::bnintermediate::BNNode;
 
 pub fn generate_output<TFactory: BNEmitterFactory + Default>(intermediate: Vec<BNNode>, target_ctx: TargetContext)
 {

@@ -5,7 +5,7 @@ use crate::bncore::MAX_PROGRAM_BYTES;
 use crate::bncore::BYTE_CEIL_WRAP_U8;
 use crate::bnemit::BNEmitter;
 use crate::bndest::BNDest;
-use crate::bnintrep::BNNode;
+use crate::bnintermediate::BNNode;
 
 pub struct InterpretedEmitter
 {

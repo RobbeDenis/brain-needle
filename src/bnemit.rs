@@ -9,7 +9,7 @@ use bnemit_interpreted::InterpretedEmitter;
 
 use crate::bndest::BNDestFactory;
 use crate::bndest::BNDest;
-use crate::bnintrep::BNNode;
+use crate::bnintermediate::BNNode;
 use crate::bnctx::{OutputFormat, TargetContext};
 
 pub trait BNEmitter

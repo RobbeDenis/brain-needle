@@ -4,7 +4,7 @@ fn main()
 {
     use brain_needle::*;
     use bnemit::BNEmitterFactoryDefault;
-    use bnintrep::generate_intermediate_representation;
+    use bnintermediate::generate_intermediate_representation;
     use bncore::create_bnreader;
 
     let config = build_config();
@@ -46,7 +46,7 @@ fn mock_config() -> brain_needle::bnconfig::Config
     use brain_needle::bnconfig::Config;
     use brain_needle::bnctx::*;
 
-    let input_path = "src-bf\\test\\wrap_pos.bf".into();
+    let input_path = "bf\\test\\wrap_pos.bf".into();
 
     let ctx = TargetContext { 
         os:     TargetOS::Linux, 

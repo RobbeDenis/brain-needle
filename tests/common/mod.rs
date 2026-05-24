@@ -7,7 +7,7 @@ pub(crate) use bnctx::*;
 pub(crate) use bnemit::BNEmitterFactory;
 pub(crate) use bndest::BNDest;
 pub(crate) use bndest::BNDestFactory;
-pub(crate) use bnintrep::BNNode;
+pub(crate) use bnintermediate::BNNode;
 pub(crate) use std::rc::Rc;
 pub(crate) use std::cell::RefCell;
 
