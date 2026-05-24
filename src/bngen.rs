@@ -1,10 +1,9 @@
 
-// using
-use crate::bncore::Node;
 use crate::bnctx::TargetContext;
 use crate::bnemit::*;
+use crate::bnintrep::BNNode;
 
-pub fn generate_output<TFactory: BNEmitterFactory + Default>(instr_tree: Vec<Node>, target_ctx: TargetContext)
+pub fn generate_output<TFactory: BNEmitterFactory + Default>(intermediate: Vec<BNNode>, target_ctx: TargetContext)
 {
     let mut factory = TFactory::default();
     let mut codegen = factory.create(&target_ctx);
@@ -12,21 +11,22 @@ pub fn generate_output<TFactory: BNEmitterFactory + Default>(instr_tree: Vec<Nod
     codegen.emit_setup();
     
     let mut i: usize = 0;
-    while i < instr_tree.len() {
-    let node = &instr_tree[i];
+    while i < intermediate.len() {
+    let node = &intermediate[i];
         match  *node {
-            Node::Add(__) | 
-            Node::Sub(__) => codegen.emit_arithmetic(node),
-            Node::Right(__) | 
-            Node::Left(__) => codegen.emit_shift(node),
-            Node::JumpIfZero(__) | 
-            Node::JumpIfNotZero(__) => {
+            BNNode::Add(_) | 
+            BNNode::Sub(_) => codegen.emit_arithmetic(node),
+            BNNode::Right(_) | 
+            BNNode::Left(_) => codegen.emit_shift(node),
+            BNNode::Loop(_) | 
+            BNNode::EndLoop(_) => {
                 if let Some(target) = codegen.emit_jump(node) {
                     i = target;
                 }
             },
-            Node::Out => codegen.emit_out(),
-            Node::In => codegen.emit_in()
+            BNNode::Out(_) => codegen.emit_out(),
+            BNNode::In(_) => codegen.emit_in(),
+            BNNode::Sentinel(_) => panic!("Sentinel node should not be in final IR")
         }
         i += 1;
     }

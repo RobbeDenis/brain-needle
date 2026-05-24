@@ -26,11 +26,11 @@ fn wrap_neg()
             output: Rc::clone(&output)
         };
         
-        use Node::*;
-        let tree: Vec<Node> = vec![
-            Sub(1), Out, Right(1), Sub(24708), Out, 
-            Right(1), Sub(40), Sub(40), Out,
-            Right(1), Sub(489), Sub(123), Sub(100), Out
+        use BNNode::*;
+        let tree: Vec<BNNode> = vec![
+            Sub(1), Out(1), Right(1), Sub(24708), Out(1), 
+            Right(1), Sub(40), Sub(40), Out(1),
+            Right(1), Sub(489), Sub(123), Sub(100), Out(1)
         ];
 
         test_generate_output(tree, CTX, &mut factory);
@@ -54,11 +54,11 @@ fn wrap_pos()
             output: Rc::clone(&output)
         };
         
-        use Node::*;
-        let tree: Vec<Node> = vec![
-            Add(256), Out, Right(1), Add(8541), Out,
-            Right(1), Add(145), Add(14854), Add(50), Out,
-            Right(1), Add(588), Out
+        use BNNode::*;
+        let tree: Vec<BNNode> = vec![
+            Add(256), Out(1), Right(1), Add(8541), Out(1),
+            Right(1), Add(145), Add(14854), Add(50), Out(1),
+            Right(1), Add(588), Out(1)
         ];
 
         test_generate_output(tree, CTX, &mut factory);

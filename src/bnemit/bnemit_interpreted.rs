@@ -1,12 +1,11 @@
 
 use std::io::Read;
 
-// using
 use crate::bncore::MAX_PROGRAM_BYTES;
 use crate::bncore::BYTE_CEIL_WRAP_U8;
 use crate::bnemit::BNEmitter;
 use crate::bndest::BNDest;
-use crate::bncore::Node;
+use crate::bnintrep::BNNode;
 
 pub struct InterpretedEmitter
 {
@@ -30,42 +29,42 @@ impl BNEmitter for InterpretedEmitter
         self.cells.resize(MAX_PROGRAM_BYTES, 0);
     }
 
-    fn emit_arithmetic(&mut self, node: &Node)
+    fn emit_arithmetic(&mut self, node: &BNNode)
     {
         match node {
-            Node::Add(value) => {
+            BNNode::Add(value) => {
                 self.cells[self.ptr_idx] = self.cells[self.ptr_idx].wrapping_add(*value as u8) % BYTE_CEIL_WRAP_U8;
             },
-            Node::Sub(value) => {
+            BNNode::Sub(value) => {
                 self.cells[self.ptr_idx] = self.cells[self.ptr_idx].wrapping_sub(*value as u8) % BYTE_CEIL_WRAP_U8;
             },
             _ => panic!("Called emit_arithmetic when given node was not arithmetic")
         }
     }
 
-    fn emit_shift(&mut self, node: &Node)
+    fn emit_shift(&mut self, node: &BNNode)
     {
         match node {
-            Node::Right(value) => {
+            BNNode::Right(value) => {
                 self.ptr_idx += *value as usize % MAX_PROGRAM_BYTES;
                 if self.ptr_idx >= MAX_PROGRAM_BYTES { self.ptr_idx = self.ptr_idx % MAX_PROGRAM_BYTES }
             },
-            Node::Left(value) => {
+            BNNode::Left(value) => {
                 self.ptr_idx = (self.ptr_idx + MAX_PROGRAM_BYTES - (*value as usize % MAX_PROGRAM_BYTES)) % MAX_PROGRAM_BYTES;
             },
             _ => panic!("Called emit_shift when given node was not a shift")
         }
     }
 
-    fn emit_jump(&mut self, node: &Node) -> Option<usize>
+    fn emit_jump(&mut self, node: &BNNode) -> Option<usize>
     {
         match node {
-            Node::JumpIfZero(value) => {
+            BNNode::Loop(value) => {
                 if self.cells[self.ptr_idx] == 0 {
                     return Some(*value as usize);
                 }
             },
-            Node::JumpIfNotZero(value) => {
+            BNNode::EndLoop(value) => {
                 if self.cells[self.ptr_idx] != 0 {
                     return Some(*value as usize);
                 }

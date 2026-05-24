@@ -21,13 +21,13 @@ fn wrap_right()
             output: Rc::clone(&output)
         };
         
-        use Node::*;
+        use BNNode::*;
         let max = MAX_PROGRAM_BYTES as u16;
-        let tree: Vec<Node> = vec![
-            Add(64), Right(max), Out,
-            Add(20), Right(max / 2), Add(80), Out,
-            Right((max / 2) + 1), Sub(20), Out,
-            Left(1), Out
+        let tree: Vec<BNNode> = vec![
+            Add(64), Right(max), Out(1),
+            Add(20), Right(max / 2), Add(80), Out(1),
+            Right((max / 2) + 1), Sub(20), Out(1),
+            Left(1), Out(1)
         ];
 
         test_generate_output(tree, CTX, &mut factory);
@@ -51,13 +51,13 @@ fn wrap_left()
             output: Rc::clone(&output)
         };
         
-        use Node::*;
+        use BNNode::*;
         let max = MAX_PROGRAM_BYTES as u16;
-        let tree: Vec<Node> = vec![
-            Add(64), Left(max), Out,
-            Add(20), Left(max / 2), Add(80), Out,
-            Left((max / 2) + 1), Sub(20), Out,
-            Right(1), Out
+        let tree: Vec<BNNode> = vec![
+            Add(64), Left(max), Out(1),
+            Add(20), Left(max / 2), Add(80), Out(1),
+            Left((max / 2) + 1), Sub(20), Out(1),
+            Right(1), Out(1)
         ];
 
         test_generate_output(tree, CTX, &mut factory);

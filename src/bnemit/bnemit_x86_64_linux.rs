@@ -1,8 +1,7 @@
 
-// using
 use crate::bnemit::BNEmitter;
 use crate::bndest::BNDest;
-use crate::bncore::Node;
+use crate::bnintrep::BNNode;
 use crate::bncore::BYTE_CEIL_WRAP_U8;
 use crate::bncore::MAX_PROGRAM_BYTES;
 
@@ -39,23 +38,23 @@ impl BNEmitter for X86X64LinuxEmitter
                                         MAX_PROGRAM_BYTES).as_bytes());
     }
 
-    fn emit_arithmetic(&mut self, node: &Node)
+    fn emit_arithmetic(&mut self, node: &BNNode)
     {
         match *node {
-            Node::Add(value) => self.dest.push(format!("\tadd byte [rsi], {}\n", value).as_bytes()),
-            Node::Sub(value) => self.dest.push(format!("\tsub byte [rsi], {}\n", value).as_bytes()),
+            BNNode::Add(value) => self.dest.push(format!("\tadd byte [rsi], {}\n", value).as_bytes()),
+            BNNode::Sub(value) => self.dest.push(format!("\tsub byte [rsi], {}\n", value).as_bytes()),
             _ => panic!("Node found that was not Add or Sub")
         }
         self.emit_arithmetic_wrap();
     }
 
-    fn emit_shift(&mut self, node: &Node)
+    fn emit_shift(&mut self, node: &BNNode)
     {
         match *node {
-            Node::Right(value) => {
+            BNNode::Right(value) => {
                 self.dest.push(format!("\tadd rsp, {}\n", value).as_bytes());
             },
-            Node::Left(value) => {
+            BNNode::Left(value) => {
                 self.dest.push(format!("\tsub rsp, {}\n", value).as_bytes());
             },
             _ => panic!("Node found that was not Right or Left")
@@ -63,17 +62,17 @@ impl BNEmitter for X86X64LinuxEmitter
         self.emit_shift_wrap();
     }
 
-    fn emit_jump(&mut self, node: &Node) -> Option<usize>
+    fn emit_jump(&mut self, node: &BNNode) -> Option<usize>
     {
         match *node {
-            Node::JumpIfZero(_value) => {
+            BNNode::Loop(_value) => {
                 self.loop_count += 1;
                 self.loop_stack.push(self.loop_count);
                 self.dest.push(format!("LS_{}:\n", self.loop_count).as_bytes());
                 self.dest.push(b"\tcmp byte [rsi], 0\n");
                 self.dest.push(format!("\tjz LE_{}\n", self.loop_count).as_bytes());
             },
-            Node::JumpIfNotZero(_value) => {
+            BNNode::EndLoop(_value) => {
                 let idx = self.loop_stack.pop().unwrap();
                 self.dest.push(format!("\tjmp LS_{}\n", idx).as_bytes());
                 self.dest.push(format!("LE_{}:\n", idx).as_bytes());

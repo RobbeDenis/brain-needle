@@ -20,9 +20,9 @@ fn counter()
             output: Rc::clone(&output)
         };
         
-        use Node::*;
-        let tree: Vec<Node> = vec![
-            Add(72), JumpIfZero(6), Right(1), Add(1), Left(1), Sub(1), JumpIfNotZero(1), Right(1), Out
+        use BNNode::*;
+        let tree: Vec<BNNode> = vec![
+            Add(72), Loop(6), Right(1), Add(1), Left(1), Sub(1), EndLoop(1), Right(1), Out(1)
         ];
 
         test_generate_output(tree, CTX, &mut factory);

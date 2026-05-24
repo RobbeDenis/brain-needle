@@ -7,18 +7,17 @@ pub mod bnemit_interpreted;
 use bnemit_x86_64_linux::X86X64LinuxEmitter;
 use bnemit_interpreted::InterpretedEmitter;
 
-// using
 use crate::bndest::BNDestFactory;
 use crate::bndest::BNDest;
-use crate::bncore::Node;
+use crate::bnintrep::BNNode;
 use crate::bnctx::{OutputFormat, TargetContext};
 
 pub trait BNEmitter
 {
     fn emit_setup(&mut self);
-    fn emit_arithmetic(&mut self, node: &Node);
-    fn emit_shift(&mut self, node: &Node);
-    fn emit_jump(&mut self, node: &Node) -> Option<usize>;
+    fn emit_arithmetic(&mut self, node: &BNNode);
+    fn emit_shift(&mut self, node: &BNNode);
+    fn emit_jump(&mut self, node: &BNNode) -> Option<usize>;
     fn emit_out(&mut self);
     fn emit_in(&mut self);
     fn emit_exit(&mut self);

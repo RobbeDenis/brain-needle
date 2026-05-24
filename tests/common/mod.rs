@@ -6,11 +6,11 @@ pub(crate) use brain_needle::bnctx::*;
 pub(crate) use brain_needle::bnemit::BNEmitterFactory;
 pub(crate) use brain_needle::bndest::BNDest;
 pub(crate) use brain_needle::bndest::BNDestFactory;
-pub(crate) use brain_needle::bncore::Node;
+pub(crate) use brain_needle::bnintrep::BNNode;
 pub(crate) use std::rc::Rc;
 pub(crate) use std::cell::RefCell;
 
-pub fn test_generate_output<TFactory: BNEmitterFactory>(instr_tree: Vec<Node>, ctx: TargetContext, factory: &mut TFactory)
+pub fn test_generate_output<TFactory: BNEmitterFactory>(instr_tree: Vec<BNNode>, ctx: TargetContext, factory: &mut TFactory)
 {
     let mut codegen = factory.create(&ctx);
     
@@ -20,18 +20,19 @@ pub fn test_generate_output<TFactory: BNEmitterFactory>(instr_tree: Vec<Node>, c
     while i < instr_tree.len() {
     let node = &instr_tree[i];
         match  *node {
-            Node::Add(__) | 
-            Node::Sub(__) => codegen.emit_arithmetic(node),
-            Node::Right(__) | 
-            Node::Left(__) => codegen.emit_shift(node),
-            Node::JumpIfZero(__) | 
-            Node::JumpIfNotZero(__) => {
+            BNNode::Add(_) | 
+            BNNode::Sub(_) => codegen.emit_arithmetic(node),
+            BNNode::Right(_) | 
+            BNNode::Left(_) => codegen.emit_shift(node),
+            BNNode::Loop(_) | 
+            BNNode::EndLoop(_) => {
                 if let Some(target) = codegen.emit_jump(node) {
                     i = target;
                 }
             },
-            Node::Out => codegen.emit_out(),
-            Node::In => codegen.emit_in()
+            BNNode::Out(_) => codegen.emit_out(),
+            BNNode::In(_) => codegen.emit_in(),
+            BNNode::Sentinel(_) => panic!("Sentinel node should not be in final IR")
         }
         i += 1;
     }
