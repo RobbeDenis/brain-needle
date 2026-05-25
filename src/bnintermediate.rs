@@ -241,16 +241,15 @@ mod ir_builder_tests
         bn_unwrap!(builder.enter_token(BNToken::None));
 
         let intrep = bn_unwrap!(builder.finalize());
-        bn_assert_eq!(BNNode::Add(1), intrep[0], 0);
-        bn_assert_eq!(BNNode::Sub(1), intrep[1], 1);
-        bn_assert_eq!(BNNode::Right(1), intrep[2], 2);
-        bn_assert_eq!(BNNode::Left(1), intrep[3], 3);
-        bn_assert_eq!(BNNode::Loop(5), intrep[4], 4);
-        bn_assert_eq!(BNNode::EndLoop(4), intrep[5], 5);
-        bn_assert_eq!(BNNode::In(1), intrep[6], 6);
-        bn_assert_eq!(BNNode::Out(1), intrep[7], 7);
-        bn_assert_eq!("Length does not match expected", 8, intrep.len());
-
+        bn_assert_eq!(BNNode::Add(1), intrep[0]);
+        bn_assert_eq!(BNNode::Sub(1), intrep[1]);
+        bn_assert_eq!(BNNode::Right(1), intrep[2]);
+        bn_assert_eq!(BNNode::Left(1), intrep[3]);
+        bn_assert_eq!(BNNode::Loop(5), intrep[4]);
+        bn_assert_eq!(BNNode::EndLoop(4), intrep[5]);
+        bn_assert_eq!(BNNode::In(1), intrep[6]);
+        bn_assert_eq!(BNNode::Out(1), intrep[7]);
+        bn_assert_eq!(8, intrep.len(), "len");
     }
 
     #[test]
@@ -271,13 +270,13 @@ mod ir_builder_tests
         }}
 
         let intrep = bn_unwrap!(builder.finalize());
-        bn_assert_eq!(BNNode::Add(amount), intrep[0], 0);
-        bn_assert_eq!(BNNode::Sub(amount), intrep[1], 1);
-        bn_assert_eq!(BNNode::Right(amount), intrep[2], 2);
-        bn_assert_eq!(BNNode::Left(amount), intrep[3], 3);
-        bn_assert_eq!(BNNode::In(amount), intrep[4], 4);
-        bn_assert_eq!(BNNode::Out(amount), intrep[5], 5);
-        bn_assert_eq!("Length does not match expected", 6, intrep.len());
+        bn_assert_eq!(BNNode::Add(amount), intrep[0]);
+        bn_assert_eq!(BNNode::Sub(amount), intrep[1]);
+        bn_assert_eq!(BNNode::Right(amount), intrep[2]);
+        bn_assert_eq!(BNNode::Left(amount), intrep[3]);
+        bn_assert_eq!(BNNode::In(amount), intrep[4]);
+        bn_assert_eq!(BNNode::Out(amount), intrep[5]);
+        bn_assert_eq!(6, intrep.len(), "len");
     }
 
     #[test]
@@ -302,13 +301,13 @@ mod ir_builder_tests
         }}
 
         let intrep = bn_unwrap!(builder.finalize());
-        bn_assert_eq!(BNNode::Add(amount), intrep[0], 0);
-        bn_assert_eq!(BNNode::Sub(amount), intrep[1], 1);
-        bn_assert_eq!(BNNode::Right(amount), intrep[2], 2);
-        bn_assert_eq!(BNNode::Left(amount), intrep[3], 3);
-        bn_assert_eq!(BNNode::In(amount), intrep[4], 4);
-        bn_assert_eq!(BNNode::Out(amount), intrep[5], 5);
-        bn_assert_eq!("Length does not match expected", 6, intrep.len());
+        bn_assert_eq!(BNNode::Add(amount), intrep[0]);
+        bn_assert_eq!(BNNode::Sub(amount), intrep[1]);
+        bn_assert_eq!(BNNode::Right(amount), intrep[2]);
+        bn_assert_eq!(BNNode::Left(amount), intrep[3]);
+        bn_assert_eq!(BNNode::In(amount), intrep[4]);
+        bn_assert_eq!(BNNode::Out(amount), intrep[5]);
+        bn_assert_eq!(6, intrep.len(), "len");
     }
 
     #[test]
@@ -335,19 +334,19 @@ mod ir_builder_tests
         }
 
         let intrep = bn_unwrap!(builder.finalize());
-        bn_assert_eq!(BNNode::Add(half_amount), intrep[0], 0);
-        bn_assert_eq!(BNNode::Add(half_amount), intrep[2], 2);
-        bn_assert_eq!(BNNode::Sub(half_amount), intrep[4], 4);
-        bn_assert_eq!(BNNode::Sub(half_amount), intrep[6], 6);
-        bn_assert_eq!(BNNode::Right(half_amount), intrep[8], 8);
-        bn_assert_eq!(BNNode::Right(half_amount), intrep[10], 10);
-        bn_assert_eq!(BNNode::Left(half_amount), intrep[12], 12);
-        bn_assert_eq!(BNNode::Left(half_amount), intrep[14], 14);
-        bn_assert_eq!(BNNode::In(half_amount), intrep[16], 16);
-        bn_assert_eq!(BNNode::In(half_amount), intrep[18], 18);
-        bn_assert_eq!(BNNode::Out(half_amount), intrep[20], 20);
-        bn_assert_eq!(BNNode::Out(half_amount), intrep[22], 22);
-        bn_assert_eq!("Length does not match expected", 24, intrep.len());
+        bn_assert_eq!(BNNode::Add(half_amount), intrep[0]);
+        bn_assert_eq!(BNNode::Add(half_amount), intrep[2]);
+        bn_assert_eq!(BNNode::Sub(half_amount), intrep[4]);
+        bn_assert_eq!(BNNode::Sub(half_amount), intrep[6]);
+        bn_assert_eq!(BNNode::Right(half_amount), intrep[8]);
+        bn_assert_eq!(BNNode::Right(half_amount), intrep[10]);
+        bn_assert_eq!(BNNode::Left(half_amount), intrep[12]);
+        bn_assert_eq!(BNNode::Left(half_amount), intrep[14]);
+        bn_assert_eq!(BNNode::In(half_amount), intrep[16]);
+        bn_assert_eq!(BNNode::In(half_amount), intrep[18]);
+        bn_assert_eq!(BNNode::Out(half_amount), intrep[20]);
+        bn_assert_eq!(BNNode::Out(half_amount), intrep[22]);
+        bn_assert_eq!(24, intrep.len(), "len");
     }
 
     #[test]

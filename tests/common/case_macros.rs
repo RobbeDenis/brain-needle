@@ -10,10 +10,10 @@ macro_rules! print_captured_output {
 
         std::io::stdout().flush().unwrap();
         println!("\n{}", s_test_name.paint(format!("         {}         ", $name)));
-        println!("{}", s_header.paint("[String]"));
-        println!("{}", s_data.paint(&$out));
         println!("{}", s_header.paint("[Bytes]"));
         println!("{}", s_data.paint(format!("{:?}", $out.as_bytes())));
+        println!("{}", s_header.paint("[ASCII]"));
+        println!("{}", s_data.paint(&$out));
         println!("");
     };
 }
