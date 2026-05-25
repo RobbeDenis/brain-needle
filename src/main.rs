@@ -32,10 +32,14 @@ fn parsed_config() -> brain_needle::bnconfig::Config
     use brain_needle::bnconfig::*;
 
     let args = Args::parse_from_env();
-    println!("{:?}", args);
+
+    #[cfg(debug_assertions)]
+    println!("\n{:?}", args);
     
     let config = Config::build(&args);
-    println!("{:?}", config);
+
+    #[cfg(debug_assertions)]
+    println!("{:?}\n", config);
 
     return config;
 }

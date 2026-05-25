@@ -1,4 +1,7 @@
 /target
 /docs
 /output
-/examples
+
+# Ignore all output and big golden files
+/golden/**/output
+/golden/big

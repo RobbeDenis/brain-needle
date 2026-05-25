@@ -1,7 +1,6 @@
 
 mod common;
 use common::*;
-use bnconfig::Config;
 
 const CTX: TargetContext = TargetContext {
     os:     TargetOS::Linux, 
@@ -160,33 +159,5 @@ mod looping
         
         print_captured_output!(output, "COUNTER");
         bn_assert_eq!(expected, output);
-    }
-}
-
-mod io
-{
-    use super::*;
-    use bncore::create_bnreader;
-    use bnintermediate::generate_intermediate_representation;
-
-    // #[test]
-    #[allow(unused)]
-    fn single_io() {
-        let input_file = "bf/test/print_input.bf";
-        let config = Config{ file_path: input_file.into(), context: CTX };
-
-        let intermediate = bn_unwrap!(generate_intermediate_representation(create_bnreader(config.file_path)));
-        let output = Rc::new(RefCell::new(String::new()));
-        {
-            let mut factory: TestBNEmitterFactory = TestBNEmitterFactory {
-                was_dest_created: false, 
-                output: Rc::clone(&output)
-            };
-            test_generate_output(intermediate, CTX,  &mut factory);
-        }
-        let output = output.take();
-
-        print_captured_output!(output, "SINGLE IO");
-        bn_assert_eq!("Succeed!", output);
     }
 }

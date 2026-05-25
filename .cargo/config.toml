@@ -1,3 +1,6 @@
+[target.x86_64-pc-windows-llvm]
+rustflags = ["-C", "split-debuginfo=off"]
+
 [alias]
 testp = "test -- --nocapture --test-threads=1"
 itest = "test --test itest*"

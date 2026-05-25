@@ -4,7 +4,7 @@ use brain_needle::bnintermediate::generate_intermediate_representation;
 
 pub fn generate_ir(c: &mut Criterion)
 {
-    let contents = std::fs::read_to_string("bf/mandelbrot_extreme.bf").unwrap();
+    let contents = std::fs::read_to_string("bf/big/mandelbrot_extreme.bf").unwrap();
     let heavy_load = contents.repeat(8).into_bytes();
 
     c.bench_function("Generate IR", |b| {
