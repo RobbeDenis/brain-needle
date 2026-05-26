@@ -2,6 +2,7 @@
 
 
 CLEAN_STATS_FORMAT=$'
+--------\n
 STATS
  Real       : %E
  User       : %U

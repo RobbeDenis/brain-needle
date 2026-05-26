@@ -9,14 +9,20 @@ export GREEN="\e[32m"
 export UNDL="\e[4;37m"
 export BOLD="\e[1;97m"
 
-# Usage
-if [ -z "$BF_QUERY" ]; then
-    echo -e "$Usage: $0 <file query in ./bf>"
-    exit 1
+# Clean output/quickc/
+if [ "$BF_QUERY" == "--clean" ]; then
+    rm output/quickc/*.asm
+    exit 0
 fi
 
-# Find matching files
-FOUND_FILES=$(find bf -type f -name "*$BF_QUERY*")
+# Query
+if [ -z "$BF_QUERY" ]; then
+    # Find matching files for .b*
+    FOUND_FILES=$(find bf -type f -name "*.b*")
+else
+    # Find matching files for query
+    FOUND_FILES=$(find bf -type f -name "*$BF_QUERY*")
+fi
 
 if [ -z "$FOUND_FILES" ]; then
     echo -e "${RED}Error${NC}: No files matching '$BF_QUERY' found in ./bf"
@@ -35,7 +41,7 @@ while [ $(echo "$FOUND_FILES" | wc -l) -gt 1 ]; do
 
     # Check if narrow was valid
     if [ -z "$FOUND_FILES" ]; then
-        echo -e "${RED}Error${NC}: No files matched '$BF_QUERY'"
+        echo -e "${RED}Error${NC}: No files matched '$NARROW_QUERY'"
         FOUND_FILES=$(find bf -type f -name "*$BF_QUERY*")
     fi
 done
@@ -50,15 +56,23 @@ while true; do
     if [[ -z "$CONFIRM" || "$CONFIRM" == "y" || "$CONFIRM" == "yes" ]]; then
         break;
     elif [[ "$CONFIRM" == "n" || "$CONFIRM" == "no" ]]; then
-        echo -e "Aborted."
+        echo -e "Aborted"
         exit 0
     fi
 done
 
-# Start compiling the file
 COMPILER_SRC="."
 COMPILER_EXE="$COMPILER_SRC/target/release/brain-needle.exe"
 
-echo -e "Compiling: ${GREEN}$BF_FILE${NC}"
-
-./scripts/profile_verbose.sh "$COMPILER_EXE" "$BF_FILE"
+# Do interpreted if no extra arguments where specified else compile
+if [[ -z "${@:2}" ]]; then
+    echo -e "\nInterpreting with brain-needle ${GREEN}$BF_FILE${NC}"
+    echo -e "--------"
+    ./scripts/profile_verbose.sh "$COMPILER_EXE" "$BF_FILE"
+else
+    OUTPUT_FILE="output/quickc/${BF_FILE##*/}"
+    OUTPUT_FILE="${OUTPUT_FILE%.*}.asm"
+    echo -e "\nCompiling with brain-needle ${GREEN}$BF_FILE${NC}"
+    echo -e "--------"
+    ./scripts/profile_verbose.sh "$COMPILER_EXE" "$BF_FILE" -d file -o "$OUTPUT_FILE" "${@:2}"
+fi
