@@ -12,6 +12,8 @@ export BOLD="\e[1;97m"
 # Clean output/quickc/
 if [ "$BF_QUERY" == "--clean" ]; then
     rm output/quickc/*.asm
+    rm output/quickc/*.o
+    rm output/quickc/*.exe
     exit 0
 fi
 
@@ -71,8 +73,17 @@ if [[ -z "${@:2}" ]]; then
     ./scripts/profile_verbose.sh "$COMPILER_EXE" "$BF_FILE"
 else
     OUTPUT_FILE="output/quickc/${BF_FILE##*/}"
-    OUTPUT_FILE="${OUTPUT_FILE%.*}.asm"
+    OUTPUT_FILE="${OUTPUT_FILE%.*}"
     echo -e "\nCompiling with brain-needle ${GREEN}$BF_FILE${NC}"
     echo -e "--------"
-    ./scripts/profile_verbose.sh "$COMPILER_EXE" "$BF_FILE" -d file -o "$OUTPUT_FILE" "${@:2}"
+    ./scripts/profile_verbose.sh "$COMPILER_EXE" "$BF_FILE" -d file -o "$OUTPUT_FILE.asm" "${@:2}"
+
+    # Compile with nasm
+    echo -e "Compiling with nasm"
+    nasm -f elf64 "$OUTPUT_FILE.asm" -o "$OUTPUT_FILE.o"
+    echo -e "Linking..."
+    ld "$OUTPUT_FILE.o" -o "$OUTPUT_FILE.exe"
+    echo -e "Running ${GREEN}$OUTPUT_FILE.exe${NC}"
+    echo -e "--------"
+    ./scripts/profile_verbose.sh "./$OUTPUT_FILE.exe"
 fi
