@@ -26,7 +26,7 @@ impl X86X64LinuxEmitter
 
     fn emit_shift_wrap(&mut self)
     {
-        self.dest.push(format!("\tand rsp, {}\n\tlea rsi, [rbx + rsp]\n", MAX_PROGRAM_BYTES - 1).as_bytes());
+        self.dest.push(format!("\tand r12, {}\n\tlea rsi, [rbx + r12]\n", MAX_PROGRAM_BYTES - 1).as_bytes());
     }
 }
 
@@ -34,7 +34,7 @@ impl BNEmitter for X86X64LinuxEmitter
 {
     fn emit_setup(&mut self)
     {
-        self.dest.push(format!("section .data\n\ttape times {0} db 0\n\nsection .text\n\tglobal _start\n\n_start:\n\tlea rbx, [rel tape]\n\txor rsp, rsp\n\tlea rsi, [rbx + rsp]\n\tmov byte [rsi], 0\n\n",
+        self.dest.push(format!("section .data\n\ttape times {0} db 0\n\nsection .text\n\tglobal _start\n\n_start:\n\tlea rbx, [rel tape]\n\txor r12, r12\n\tlea rsi, [rbx + r12]\n\tmov byte [rsi], 0\n\n",
                                         MAX_PROGRAM_BYTES).as_bytes());
     }
 
@@ -52,10 +52,10 @@ impl BNEmitter for X86X64LinuxEmitter
     {
         match *node {
             BNNode::Right(value) => {
-                self.dest.push(format!("\tadd rsp, {}\n", value).as_bytes());
+                self.dest.push(format!("\tadd r12, {}\n", value).as_bytes());
             },
             BNNode::Left(value) => {
-                self.dest.push(format!("\tsub rsp, {}\n", value).as_bytes());
+                self.dest.push(format!("\tsub r12, {}\n", value).as_bytes());
             },
             _ => panic!("Node found that was not Right or Left")
         }
