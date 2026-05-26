@@ -1,6 +1,7 @@
 # brain-needle
 Brain-needle is a brainfuck interpreter and compiler for x86-64 assembly.
-The reason for making this project is to learn some rust and the basics of creating a modular compiler.
+The initial goal of this project was to learn rust, by making a simple interpreter.
+But it quickly turned into learning about modular compiler design rather then rust.
 
 ## Implemented
 - IR generation [`bnintermediate.rs`](src/bnintermediate.rs)
@@ -10,12 +11,15 @@ The reason for making this project is to learn some rust and the basics of creat
 - Output destination [`bndest.rs`](src/bndest.rs)
     - [stdout](src/bndest/bndest_stdout.rs)
     - [file](src/bndest/bndest_file.rs)
-- Unit testing for validating generated output [`tests/`](tests/)
-    - Only interpreter output has validation tests, assembly tests will be added after the first optimization passes have been implemented.
+- Validation tests for the generated output [`tests/`](tests/)
+    - Only interpreter output has validation tests, concrete tests for assembly output will be added after the golden tests and the first optimization pass has been implemented.
 - Argument parser and config builder [`bnconfig.rs`](src/bnconfig.rs)
+- Criterion for benchmarks
 
 ## Currently working on
-Implementing optimization passes for the assembly generation.
+Setting up an environment for golden tests.
+
+Implementing optimization passes for the assembly generation. This involves creating a more streamlined way to setup the environment, e.g., bit-width, tape-width, wrapping, EOF and debug print.
 
 ## Usage
 ```terminal
