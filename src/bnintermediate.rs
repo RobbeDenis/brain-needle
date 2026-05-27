@@ -24,7 +24,7 @@ pub fn generate_intermediate_representation<R: Read>(reader: R) -> Result<Vec<BN
 /////// IR BUILDER ///////
 //////////////////////////
 
-type NodeValue = u16;
+pub type NodeValue = u16;
 #[derive(Debug, PartialEq, Clone)]
 pub enum BNNode {
     Add(NodeValue),
