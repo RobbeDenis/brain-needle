@@ -31,9 +31,9 @@ pub fn test_generate_output<TFactory: BNEmitterFactory>(instr_tree: Vec<BNNode>,
                     i = target;
                 }
             },
-            BNNode::Out(_) => codegen.emit_out(),
-            BNNode::In(_) => codegen.emit_in(),
-            BNNode::Sentinel(_) => panic!("Sentinel node should not be in final IR")
+            BNNode::Out => codegen.emit_out(),
+            BNNode::In => codegen.emit_in(),
+            BNNode::Sentinel => panic!("Sentinel node should not be in final IR")
         }
         i += 1;
     }

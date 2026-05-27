@@ -17,5 +17,5 @@ pub fn generate_ir(c: &mut Criterion)
         )
     });
 }
-
 criterion_group!(benches, generate_ir);
+criterion_main!(benches);

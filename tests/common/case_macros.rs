@@ -26,11 +26,11 @@ macro_rules! hello_world_instr_tree {
             Add(10),    Loop(12),       Right(1),           Add(1),     Right(1),   // 4
             Add(3),     Right(1),       Add(7),             Right(1),   Add(10),    // 9
             Left(4),    Sub(1),         EndLoop(1),         Right(3),   Add(2),     // 14
-            Out(1),     Right(1),       Add(1),             Out(1),     Add(7),     // 19
-            Out(1),     Out(1),         Add(3),             Out(1),     Left(2),    // 24
-            Add(2),     Out(1),         Right(1),           Add(15),    Out(1),     // 29
-            Right(1),   Out(1),         Add(3),             Out(1),     Sub(6),     // 34
-            Out(1),     Sub(8),         Out(1)                                      // 37
+            Out,        Right(1),       Add(1),             Out,        Add(7),     // 19
+            Out,        Out,            Add(3),             Out,        Left(2),    // 24
+            Add(2),     Out,            Right(1),           Add(15),    Out,        // 29
+            Right(1),   Out,            Add(3),             Out,        Sub(6),     // 34
+            Out,        Sub(8),         Out                                         // 37
         ]
     }};
 }

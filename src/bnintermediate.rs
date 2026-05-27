@@ -33,9 +33,9 @@ pub enum BNNode {
     Left(NodeValue),
     Loop(NodeValue),
     EndLoop(NodeValue),
-    In(NodeValue),
-    Out(NodeValue),
-    Sentinel(NodeValue)
+    In,
+    Out,
+    Sentinel
 }
 
 impl BNNode {
@@ -45,9 +45,7 @@ impl BNNode {
             BNNode::Add(value) |
             BNNode::Sub(value) |
             BNNode::Right(value) |
-            BNNode::Left(value) |
-            BNNode::In(value) |
-            BNNode::Out(value) => *value += 1,
+            BNNode::Left(value) => *value += 1,
             _ => { }
         }
     }
@@ -82,7 +80,7 @@ impl IRBuilderTrait for BNIRBuilder
     fn new() -> Self 
     {
         let mut nodes = Vec::with_capacity(4096);
-        nodes.push(BNNode::Sentinel(0));
+        nodes.push(BNNode::Sentinel);
         return Self { 
             nodes: nodes,
             loop_stack: Vec::new()
@@ -96,8 +94,8 @@ impl IRBuilderTrait for BNIRBuilder
             BNToken::Sub => self.mutate_or_push(BNNode::Sub(1)),
             BNToken::Right => self.mutate_or_push(BNNode::Right(1)),
             BNToken::Left => self.mutate_or_push(BNNode::Left(1)),
-            BNToken::In => self.mutate_or_push(BNNode::In(1)),
-            BNToken::Out => self.mutate_or_push(BNNode::Out(1)),
+            BNToken::In => self.nodes.push(BNNode::In),
+            BNToken::Out => self.nodes.push(BNNode::Out),
             BNToken::Loop => {
                 self.loop_stack.push(self.nodes.len() as NodeValue);
                 self.nodes.push(BNNode::Loop(0));
@@ -247,8 +245,8 @@ mod ir_builder_tests
         bn_assert_eq!(BNNode::Left(1), intrep[3]);
         bn_assert_eq!(BNNode::Loop(5), intrep[4]);
         bn_assert_eq!(BNNode::EndLoop(4), intrep[5]);
-        bn_assert_eq!(BNNode::In(1), intrep[6]);
-        bn_assert_eq!(BNNode::Out(1), intrep[7]);
+        bn_assert_eq!(BNNode::In, intrep[6]);
+        bn_assert_eq!(BNNode::Out, intrep[7]);
         bn_assert_eq!(8, intrep.len(), "len");
     }
 
@@ -260,8 +258,7 @@ mod ir_builder_tests
         let tokens = [
             BNToken::None, BNToken::Add,
             BNToken::Sub, BNToken::Right,
-            BNToken::Left, BNToken::In,
-            BNToken::Out,
+            BNToken::Left
         ];
 
         for token in tokens { 
@@ -274,9 +271,7 @@ mod ir_builder_tests
         bn_assert_eq!(BNNode::Sub(amount), intrep[1]);
         bn_assert_eq!(BNNode::Right(amount), intrep[2]);
         bn_assert_eq!(BNNode::Left(amount), intrep[3]);
-        bn_assert_eq!(BNNode::In(amount), intrep[4]);
-        bn_assert_eq!(BNNode::Out(amount), intrep[5]);
-        bn_assert_eq!(6, intrep.len(), "len");
+        bn_assert_eq!(4, intrep.len(), "len");
     }
 
     #[test]
@@ -287,8 +282,7 @@ mod ir_builder_tests
         let half_amount = amount / 2;
         let tokens = [
             BNToken::Add, BNToken::Sub,
-            BNToken::Right, BNToken::Left,
-            BNToken::In, BNToken::Out,
+            BNToken::Right, BNToken::Left
         ];
 
         for token in tokens { 
@@ -305,9 +299,7 @@ mod ir_builder_tests
         bn_assert_eq!(BNNode::Sub(amount), intrep[1]);
         bn_assert_eq!(BNNode::Right(amount), intrep[2]);
         bn_assert_eq!(BNNode::Left(amount), intrep[3]);
-        bn_assert_eq!(BNNode::In(amount), intrep[4]);
-        bn_assert_eq!(BNNode::Out(amount), intrep[5]);
-        bn_assert_eq!(6, intrep.len(), "len");
+        bn_assert_eq!(4, intrep.len(), "len");
     }
 
     #[test]
@@ -318,8 +310,7 @@ mod ir_builder_tests
         let half_amount = amount / 2;
         let tokens = [
             BNToken::Add, BNToken::Sub,
-            BNToken::Right, BNToken::Left,
-            BNToken::In, BNToken::Out,
+            BNToken::Right, BNToken::Left
         ];
 
         for token in tokens { 
@@ -342,11 +333,7 @@ mod ir_builder_tests
         bn_assert_eq!(BNNode::Right(half_amount), intrep[10]);
         bn_assert_eq!(BNNode::Left(half_amount), intrep[12]);
         bn_assert_eq!(BNNode::Left(half_amount), intrep[14]);
-        bn_assert_eq!(BNNode::In(half_amount), intrep[16]);
-        bn_assert_eq!(BNNode::In(half_amount), intrep[18]);
-        bn_assert_eq!(BNNode::Out(half_amount), intrep[20]);
-        bn_assert_eq!(BNNode::Out(half_amount), intrep[22]);
-        bn_assert_eq!(24, intrep.len(), "len");
+        bn_assert_eq!(16, intrep.len(), "len");
     }
 
     #[test]
