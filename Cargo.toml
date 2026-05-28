@@ -2,6 +2,7 @@
 name = "brain-needle"
 version = "0.1.0"
 edition = "2024"
+default-run = "brain-needle"
 
 [dependencies]
 ansi_term = "0.12.1"

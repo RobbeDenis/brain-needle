@@ -4,5 +4,6 @@ rustflags = ["-C", "split-debuginfo=off"]
 [alias]
 testp = "test -- --nocapture --test-threads=1"
 itest = "test --test itest*"
-itestp = "test --test test* -- --nocapture --test-threads=1"
-devtest = "test --test test_loop -- --nocapture --test-threads=1"
+itestp = "test --test itest* -- --nocapture --test-threads=1"
+
+runbc = "run --example bnbytecode_experiment"
