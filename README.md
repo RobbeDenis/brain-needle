@@ -3,6 +3,8 @@ Brain-needle is a brainfuck interpreter and compiler for x86-64 assembly.
 The initial goal of this project was to learn rust, by making a simple interpreter.
 But it quickly turned into learning about modular compiler design rather then rust.
 
+Currently active branch [code-gen-alternative](https://github.com/RobbeDenis/brain-needle/tree/code-gen-alternative)
+
 ## Implemented
 - IR generation [`bnintermediate.rs`](src/bnintermediate.rs)
 - Code generation [`bngen.rs`](src/bngen.rs)
