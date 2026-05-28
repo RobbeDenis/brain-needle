@@ -17,9 +17,11 @@ But it quickly turned into learning about modular compiler design rather then ru
 - Criterion for benchmarks
 
 ## Currently working on
-Setting up an environment for golden tests.
-
-Implementing optimization passes for the assembly generation. This involves creating a more streamlined way to setup the environment, e.g., bit-width, tape-width, wrapping, EOF and debug print.
+- Replacing the code generation by a more generic system, that would allow for targeted optimizations depending on what the emitter supports. [test-branch](https://github.com/RobbeDenis/brain-needle/tree/code-gen-alternative)
+- Implementing emitters that use bytecode interpretation on the IR instead of valued enum iteration. [test-branch](https://github.com/RobbeDenis/brain-needle/tree/code-gen-alternative)
+- Optimization passes on the IR.
+- More streamlined way to setup and integrate user defined options. e.g. bit-width, tape-width, wrapping, EOF and debug print.
+- Golden test environment.
 
 ## Usage
 ```terminal
