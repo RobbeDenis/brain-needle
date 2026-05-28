@@ -1,11 +1,11 @@
 
 // public modules
-pub mod bnemit_x86_64_linux;
-pub mod bnemit_interpreted;
+pub mod emit_x86_64_linux;
+pub mod emit_interpreted;
 
 // emitters
-use bnemit_x86_64_linux::X86X64LinuxEmitter;
-use bnemit_interpreted::InterpretedEmitter;
+use emit_x86_64_linux::X86X64LinuxEmitter;
+use emit_interpreted::InterpretedEmitter;
 
 use crate::bndest::BNDestFactory;
 use crate::bndest::BNDest;

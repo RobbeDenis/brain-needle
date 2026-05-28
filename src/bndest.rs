@@ -1,11 +1,11 @@
 
 // public modules
-pub mod bndest_file;
-pub mod bndest_stdout;
+pub mod dest_file;
+pub mod dest_stdout;
 
 // using
-use bndest_file::FileDest;
-use bndest_stdout::StdoutDest;
+use dest_file::FileDest;
+use dest_stdout::StdoutDest;
 use crate::bnctx::TargetContext;
 use crate::bnctx::OutputDest;
 

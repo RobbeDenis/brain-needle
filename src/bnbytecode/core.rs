@@ -1,9 +1,12 @@
+#[cfg(not(debug_assertions))]
+use std::hint::unreachable_unchecked;
 use std::{vec::Vec};
 
 ///////////
 // Enum  //
 ///////////
 
+pub type IValue = u16;
 #[derive(Debug, PartialEq, Clone)]
 #[repr(u8)]
 pub enum Instruction {
@@ -14,16 +17,31 @@ pub enum Instruction {
     Loop(u16),
     EndLoop(u16),
     In,
-    Out
+    Out,
+
+    /*  Used for temporary start instruction
+        Always keep as last instruction */
+        Sentinal
 }
 
 impl Instruction {
-    fn discriminant(&self) -> u8 {
+    pub fn discriminant(&self) -> u8 {
         // Rust it's own words:
         // SAFETY: Because `Self` is marked `repr(u8)`, its layout is a `repr(C)` `union`
         // between `repr(C)` structs, each of which has the `u8` discriminant as its first
         // field, so we can read the discriminant without offsetting the pointer.
         unsafe { *<*const _>::from(self).cast::<u8>() }
+    }
+
+    #[inline]
+    pub fn increment(&mut self) {
+        match self {
+            Instruction::Add(value) |
+            Instruction::Sub(value) |
+            Instruction::Right(value) |
+            Instruction::Left(value) => *value += 1,
+            _ => { }
+        }
     }
 }
 
@@ -40,7 +58,11 @@ impl PackedEnumInstructions {
         return self.data.capacity() * size_of::<u8>()
     }
 
-    pub fn internal(&self) -> &Vec<u8> {
+    pub fn internal(self) -> Vec<u8> {
+        return self.data
+    }
+
+    pub fn internal_ref(&self) -> &Vec<u8> {
         return &self.data
     }
 
@@ -61,6 +83,12 @@ impl PackedEnumInstructions {
             },
             Instruction::In | Instruction::Out => {
                 self.data.push(instr.discriminant())
+            },
+            Instruction::Sentinal => {
+                #[cfg(debug_assertions)]
+                unreachable!("Sentinal instruction should never pushed");
+                #[cfg(not(debug_assertions))]
+                unreachable_unchecked();
             }
         }
         println!("packed: {} bytes [{:?}]", self.allocated_size(), instr);

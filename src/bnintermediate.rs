@@ -52,9 +52,10 @@ impl BNNode {
 }
 
 pub trait IRBuilderTrait {
+    type Elem;
     fn new() -> Self;
     fn enter_token(&mut self, token: BNToken) -> Result<(), BNError>;
-    fn finalize(self) -> Result<Vec<BNNode>, BNError>;
+    fn finalize(self) -> Result<Vec<Self::Elem>, BNError>;
 }
 
 pub struct BNIRBuilder {
@@ -77,6 +78,7 @@ impl BNIRBuilder
 
 impl IRBuilderTrait for BNIRBuilder
 {
+    type Elem = BNNode;
     fn new() -> Self 
     {
         let mut nodes = Vec::with_capacity(4096);
@@ -155,7 +157,7 @@ pub trait TokenMatcherTrait {
     fn match_token(byte: u8) -> BNToken;
 }
 
-struct BNTokenMatcher;
+pub struct BNTokenMatcher;
 impl TokenMatcherTrait for BNTokenMatcher
 {
     #[inline]
