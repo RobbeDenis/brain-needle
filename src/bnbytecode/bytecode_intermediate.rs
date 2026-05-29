@@ -27,7 +27,7 @@ impl BNIRBuilderBytecode  {
         let data_idx = self.instructions.internal_ref().len() - size_of::<IValue>();
         if self.prev_disc == temp.discriminant() {
             let len_offset = 1;
-            let data_range = (data_idx)..(data_idx + size_of::<IValue>() - len_offset);
+            let data_range = (data_idx)..=(data_idx + size_of::<IValue>() - len_offset);
             let data_value: &mut [u8; size_of::<IValue>()] = self.instructions.internal_mut()[data_range].as_mut_array().unwrap().try_into().unwrap();
             // Increment data_value
             *data_value = (IValue::from_ne_bytes(*data_value) + 1).to_ne_bytes();
@@ -102,38 +102,147 @@ impl IRBuilderTrait for BNIRBuilderBytecode {
     }
 }
 
+/////////////////////////////
+///////     TESTS      //////
+/////////////////////////////
+
 #[cfg(test)]
 mod bytecode_ir_builder_tests {
     use super::*;
     use crate::bn_assert_slices_eq;
     use crate::bn_unwrap;
     use crate::bn_print_expected_found;
+    use crate::bn_expect_error;
 
     #[test]
     fn single_token_to_node() {
         let mut builder = BNIRBuilderBytecode::new();
-        bn_unwrap!(builder.enter_token(BNToken::None));
-        bn_unwrap!(builder.enter_token(BNToken::Add));
-        bn_unwrap!(builder.enter_token(BNToken::None));
-        bn_unwrap!(builder.enter_token(BNToken::Sub));
-        bn_unwrap!(builder.enter_token(BNToken::None));
-        bn_unwrap!(builder.enter_token(BNToken::Right));
-        bn_unwrap!(builder.enter_token(BNToken::None));
-        bn_unwrap!(builder.enter_token(BNToken::Left));
-        bn_unwrap!(builder.enter_token(BNToken::None));
-        bn_unwrap!(builder.enter_token(BNToken::Loop));
-        bn_unwrap!(builder.enter_token(BNToken::None));
-        bn_unwrap!(builder.enter_token(BNToken::EndLoop));
-        bn_unwrap!(builder.enter_token(BNToken::None));
-        bn_unwrap!(builder.enter_token(BNToken::In));
-        bn_unwrap!(builder.enter_token(BNToken::None));
-        bn_unwrap!(builder.enter_token(BNToken::Out));
-        bn_unwrap!(builder.enter_token(BNToken::None));
+        let tokens = [
+            BNToken::None, BNToken::Add,    BNToken::None, BNToken::Sub,
+            BNToken::None, BNToken::Right,  BNToken::None, BNToken::Left,
+            BNToken::None, BNToken::Loop,   BNToken::None, BNToken::EndLoop,
+            BNToken::None, BNToken::In,     BNToken::None, BNToken::Out,
+            BNToken::None,
+        ];
+
+        for token in tokens {
+            bn_unwrap!(builder.enter_token(token));
+        }
 
         let bytes = bn_unwrap!(builder.finalize());
-        let expected_bytes = vec![0,1,0, 1,1,0, 2,1,0, 3,1,0, 4,15,0, 5,12,0, 6, 7];
+        let expected_bytes = vec![
+            0,1,0,      1,1,0,      2,1,0,
+            3,1,0,      4,15,0,     5,12,0,
+            6,          7
+        ];
         
         bn_print_expected_found!(expected_bytes, bytes);
         bn_assert_slices_eq!(expected_bytes, bytes, "byte");
+    }
+
+    #[test]
+    fn collapsed_none_interrupted_tokens() {
+        let mut builder = BNIRBuilderBytecode::new();
+        let amount = 10;
+        let half_amount = amount / 2;
+        let tokens = [
+            BNToken::Add,   BNToken::Sub,
+            BNToken::Right, BNToken::Left
+        ];
+
+        for token in tokens { 
+            for _ in 0..half_amount {
+                bn_unwrap!(builder.enter_token(token.clone()));
+            } 
+            bn_unwrap!(builder.enter_token(BNToken::None));
+            for _ in 0..half_amount {
+                bn_unwrap!(builder.enter_token(token.clone()));
+        }}
+
+        let bytes = bn_unwrap!(builder.finalize());
+        let expected_bytes = vec![0,amount,0,   1,amount,0,     2,amount,0,     3,amount,0];
+        bn_print_expected_found!(expected_bytes, bytes);
+        bn_assert_slices_eq!(expected_bytes, bytes, "byte");
+    }
+
+    #[test]
+    fn collapsed_interrupted_tokens()
+    {
+        let mut builder = BNIRBuilderBytecode::new();
+        let amount = 10;
+        let half_amount = amount / 2;
+        let tokens = [
+            BNToken::Add,   BNToken::Sub,
+            BNToken::Right, BNToken::Left
+        ];
+
+        for token in tokens { 
+            for _ in 0..half_amount {
+                bn_unwrap!(builder.enter_token(token.clone()));
+            } 
+            bn_unwrap!(builder.enter_token(BNToken::Loop));
+            for _ in 0..half_amount {
+                bn_unwrap!(builder.enter_token(token.clone()));
+            }
+            bn_unwrap!(builder.enter_token(BNToken::EndLoop));
+        }
+
+        let bytes = bn_unwrap!(builder.finalize());
+        let expected_bytes = vec![
+            0,half_amount,0,    4,9,0,      0,half_amount,0,    5,3,0,
+            1,half_amount,0,    4,21,0,     1,half_amount,0,    5,15,0,
+            2,half_amount,0,    4,33,0,     2,half_amount,0,    5,27,0,
+            3,half_amount,0,    4,45,0,     3,half_amount,0,    5,39,0,
+        ];
+
+        bn_print_expected_found!(expected_bytes, bytes);
+        bn_assert_slices_eq!(expected_bytes, bytes, "byte");
+    }
+
+    #[test]
+    fn bigger_byte_values()
+    {
+        let mut builder = BNIRBuilderBytecode::new();
+        let amount = u16::MAX;
+        let tokens = [
+            BNToken::Add,   BNToken::Sub,
+            BNToken::Right, BNToken::Left
+        ];
+
+        for token in tokens {
+            for _ in 0..amount {
+                bn_unwrap!(builder.enter_token(token.clone()));
+            }
+        }
+
+        let bytes = bn_unwrap!(builder.finalize());
+        let expected_bytes = vec![
+            0, 0xFF, 0xFF,
+            1, 0xFF, 0xFF,
+            2, 0xFF, 0xFF,
+            3, 0xFF, 0xFF
+        ];
+
+        bn_print_expected_found!(expected_bytes, bytes);
+        bn_assert_slices_eq!(expected_bytes, bytes, "byte");
+    }
+
+    #[test]
+    fn loop_mismatch_error()
+    {
+        let mut builder = BNIRBuilderBytecode::new();
+        bn_unwrap!(builder.enter_token(BNToken::Loop));
+        bn_unwrap!(builder.enter_token(BNToken::Loop));
+        bn_unwrap!(builder.enter_token(BNToken::EndLoop));
+        bn_expect_error!(builder.finalize(), BNError::LoopTokenMismatch);
+    }
+
+    #[test]
+    fn end_loop_mismatch_error()
+    {
+        let mut builder = BNIRBuilderBytecode::new();
+        bn_unwrap!(builder.enter_token(BNToken::Loop));
+        bn_unwrap!(builder.enter_token(BNToken::EndLoop));
+        bn_expect_error!(builder.enter_token(BNToken::EndLoop), BNError::EndLoopTokenMismatch);
     }
 }
