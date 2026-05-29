@@ -24,16 +24,16 @@ macro_rules! bn_fnident {
 #[macro_export]
 macro_rules! bn_assert_eq {
     ($expected:expr, $found:expr, $(header)? $(h)?: $header:expr) => {{
-        bn_assert_eq!($expected, $found, None, $header);
+        $crate::bn_assert_eq!($expected, $found, None, $header);
     }};
     ($expected:expr, $found:expr, $ctx_hint:expr, $(header)? $(h)?: $header:expr) => {{
-        bn_assert_eq!($expected, $found, Some($ctx_hint), $header);
+        $crate::bn_assert_eq!($expected, $found, Some($ctx_hint), $header);
     }};
     ($expected:expr, $found:expr, $ctx_hint:expr) => {{
-        bn_assert_eq!($expected, $found, Some($ctx_hint), $crate::bn_fnident!());
+        $crate::bn_assert_eq!($expected, $found, Some($ctx_hint), $crate::bn_fnident!());
     }};
     ($expected:expr, $found:expr) => {{
-        bn_assert_eq!($expected, $found, None, $crate::bn_fnident!());
+        $crate::bn_assert_eq!($expected, $found, None, $crate::bn_fnident!());
     }};
     ($expected:expr, $found:expr, $ctx_hint:expr, $header:expr) => {{
         if &$expected != &$found {
@@ -55,13 +55,53 @@ macro_rules! bn_assert_eq {
 }
 
 #[macro_export]
+macro_rules! bn_assert_slices_eq {
+    ($expected:expr, $found:expr, $(header)? $(h)?: $header:expr) => {{
+        $crate::bn_assert_slices_eq!($expected, $found, None, $header);
+    }};
+    ($expected:expr, $found:expr, $ctx_hint:expr, $(header)? $(h)?: $header:expr) => {{
+        $crate::bn_assert_slices_eq!($expected, $found, Some($ctx_hint), $header);
+    }};
+    ($expected:expr, $found:expr, $ctx_hint:expr) => {{
+        $crate::bn_assert_slices_eq!($expected, $found, Some($ctx_hint), $crate::bn_fnident!());
+    }};
+    ($expected:expr, $found:expr) => {{
+        $crate::bn_assert_slices_eq!($expected, $found, None, $crate::bn_fnident!());
+    }};
+    ($expected:expr, $found:expr, $ctx_hint:expr, $header:expr) => {{
+        let exp_slice: &[_] = &$expected;
+        let fnd_slice: &[_] = &$found;
+
+        $crate::bn_assert_eq!(exp_slice.len(), fnd_slice.len(), "len");
+
+        for (i, (exp, fnd)) in exp_slice.iter().zip(fnd_slice.iter()).enumerate() {
+            if exp != fnd {
+                use ansi_term::Color::{Green, Red, Yellow};
+                let hint: Option<&str> = $ctx_hint;
+                let hint = match hint {
+                    Some(v) => format!("{} ", v),
+                    None => String::new(),
+                };
+                panic!(
+                    "\nAssert slice equal failed at {}:{}:\n{}\n{}at {}{} : {:?}\n{}at {}{} : {:?}\n",
+                    file!(), line!(),
+                    Yellow.bold().paint(format!("[{}]", $header)),
+                    Green.paint("Expected "), hint, i, exp,
+                    Red.paint("   Found "), hint, i, fnd
+                );
+            }
+        }
+    }};
+}
+
+#[macro_export]
 macro_rules! bn_unwrap {
     ($result:expr) => {{
         match $result {
             Err(err) => {
                 use ansi_term::Color::Yellow;
                 panic!(
-                    "\nUnwrap panicked at {}:{}:\n{}\n{}\n",
+                    "\nUnwrap panicked at {}:{}:\n{}\n{}",
                     file!(), line!(),
                     Yellow.bold().paint(format!("[{}]", $crate::bn_fnident!())),
                     err
@@ -114,6 +154,43 @@ macro_rules! bn_some {
             }
             Some(v) => v
         }
+    }};
+}
+
+//////////////////////////////
+////  debug print macros  ////
+//////////////////////////////
+
+#[macro_export]
+macro_rules! bn_print_string_as_bytes_and_ascii {
+    ($out:expr,$name:expr) => {
+        use std::io::Write;
+        use ansi_term::*;
+        let s_test_name = Color::Cyan.bold().underline();
+        let s_header = Color::White.bold();
+        let s_data = Color::White.on(Color::Black).fg(Color::White);
+
+        std::io::stdout().flush().unwrap();
+        println!("\n{}", s_test_name.paint(format!("         {}         ", $name)));
+        println!("{}", s_header.paint("[Bytes]"));
+        println!("{}", s_data.paint(format!("{:?}", $out.as_bytes())));
+        println!("{}", s_header.paint("[ASCII]"));
+        println!("{}", s_data.paint(&$out));
+        println!("");
+    };
+}
+
+#[macro_export]
+macro_rules! bn_print_expected_found {
+    ($expected:expr, $found:expr) => {{
+        let exp = &$expected;
+        let fnd = &$found;
+        use ansi_term::Color::{Green, Red};
+        println!(
+            "{} : {:?}\n{} : {:?}\n",
+            Green.paint("Expected "), exp,
+            Red.paint("   Found "), fnd
+        );
     }};
 }
 

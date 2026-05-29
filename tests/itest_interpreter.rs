@@ -36,7 +36,7 @@ mod arithmetic
         let expected = vec![127, 124, 48, 56];
         let expected = String::from_utf8(expected).unwrap();   
         
-        print_captured_output!(output, "WRAP NEG");
+        bn_print_string_as_bytes_and_ascii!(output, "WRAP NEG");
         bn_assert_eq!(expected, output);
     }
 
@@ -63,7 +63,7 @@ mod arithmetic
         let expected = vec![0, 93, 73, 76];
         let expected = String::from_utf8(expected).unwrap();  
 
-        print_captured_output!(output, "WRAP POS");
+        bn_print_string_as_bytes_and_ascii!(output, "WRAP POS");
         bn_assert_eq!(expected, output);
     }
 }
@@ -98,7 +98,7 @@ mod shift
         let expected = vec![64, 80, 108, 84];
         let expected = String::from_utf8(expected).unwrap(); 
         
-        print_captured_output!(output, "WRAP RIGHT");
+        bn_print_string_as_bytes_and_ascii!(output, "WRAP RIGHT");
         bn_assert_eq!(expected, output);
     }
 
@@ -127,7 +127,7 @@ mod shift
         let expected = vec![64, 80, 108, 84];
         let expected = String::from_utf8(expected).unwrap();
 
-        print_captured_output!(output, "WRAP LEFT");
+        bn_print_string_as_bytes_and_ascii!(output, "WRAP LEFT");
         bn_assert_eq!(expected, output);
     }
 }
@@ -157,7 +157,7 @@ mod looping
         let expected = vec![72];
         let expected = String::from_utf8(expected).unwrap(); 
         
-        print_captured_output!(output, "COUNTER");
+        bn_print_string_as_bytes_and_ascii!(output, "COUNTER");
         bn_assert_eq!(expected, output);
     }
 }

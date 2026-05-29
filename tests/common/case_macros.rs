@@ -1,24 +1,5 @@
 
 #[macro_export]
-macro_rules! print_captured_output {
-    ($out:expr,$name:expr) => {
-        use std::io::Write;
-        use ansi_term::*;
-        let s_test_name = Color::Cyan.bold().underline();
-        let s_header = Color::White.bold();
-        let s_data = Color::White.on(Color::Black).fg(Color::White);
-
-        std::io::stdout().flush().unwrap();
-        println!("\n{}", s_test_name.paint(format!("         {}         ", $name)));
-        println!("{}", s_header.paint("[Bytes]"));
-        println!("{}", s_data.paint(format!("{:?}", $out.as_bytes())));
-        println!("{}", s_header.paint("[ASCII]"));
-        println!("{}", s_data.paint(&$out));
-        println!("");
-    };
-}
-
-#[macro_export]
 macro_rules! hello_world_instr_tree {
     () => {{
         use brain_needle::bnintermediate::BNNode::*;

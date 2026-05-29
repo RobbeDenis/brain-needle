@@ -50,7 +50,7 @@ fn mock_config() -> brain_needle::bnconfig::Config
     use brain_needle::bnconfig::Config;
     use brain_needle::bnctx::*;
 
-    let input_path = "bf\\test\\wrap_pos.bf".into();
+    let input_path = "bf/wrap_pos.bf".into();
 
     let ctx = TargetContext { 
         os:     TargetOS::Linux, 

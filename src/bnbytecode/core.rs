@@ -79,7 +79,7 @@ impl PackedEnumInstructions {
             Instruction::Loop(value) |
             Instruction::EndLoop(value) => {
                 self.data.push(instr.discriminant());
-                self.data.extend_from_slice(&value.to_le_bytes())
+                self.data.extend_from_slice(&value.to_ne_bytes())
             },
             Instruction::In | Instruction::Out => {
                 self.data.push(instr.discriminant())
@@ -91,6 +91,6 @@ impl PackedEnumInstructions {
                 unreachable_unchecked();
             }
         }
-        println!("packed: {} bytes [{:?}]", self.allocated_size(), instr);
+        println!("alloc: {} packed: {} bytes [{:?}]", self.allocated_size(), self.data.len(), instr);
     }
 }
