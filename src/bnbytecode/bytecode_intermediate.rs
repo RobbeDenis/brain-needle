@@ -24,13 +24,15 @@ pub struct BNIRBuilderBytecode {
 impl BNIRBuilderBytecode  {
     #[inline]
     fn increment_or_push(&mut self, temp: Instruction) {
-        let data_idx = self.instructions.internal_ref().len() - size_of::<IValue>();
+        // let len_offset = 1;
+        let disc_idx = self.instructions.internal_ref().len() - size_of::<IValue>() - 1;
+        // let data_idx = self.instructions.internal_ref().len() - size_of::<IValue>();
         if self.prev_disc == temp.discriminant() {
-            let len_offset = 1;
-            let data_range = (data_idx)..=(data_idx + size_of::<IValue>() - len_offset);
-            let data_value: &mut [u8; size_of::<IValue>()] = self.instructions.internal_mut()[data_range].as_mut_array().unwrap().try_into().unwrap();
-            // Increment data_value
-            *data_value = (IValue::from_ne_bytes(*data_value) + 1).to_ne_bytes();
+            // let data_range = (data_idx)..=(data_idx + size_of::<IValue>() - len_offset);
+            // let data_value: &mut [u8; size_of::<IValue>()] = self.instructions.internal_mut()[data_range].as_mut_array().unwrap().try_into().unwrap();
+            // // Increment data_value
+            // *data_value = (IValue::from_ne_bytes(*data_value) + 1).to_ne_bytes();
+            increment_u16_at(self.instructions.internal_mut(), disc_idx);
         } else {
             self.push(temp);
         }
@@ -39,7 +41,7 @@ impl BNIRBuilderBytecode  {
     #[inline]
     fn push(&mut self, inst: Instruction) {
         self.prev_disc = inst.discriminant();
-        // maybe make a push_mut() so we have a ref to the last full instruction which can be used in mutate_or_push()
+        // maybe make a push_mut() so we have a ref to the last full instruction which can be used in mutate_or_push() TODO
         // most likely safer then saving last discriminant and reinterpreting the other bytes based on assuming that prev_disc is not wrongly set
         self.instructions.push(inst); 
     }
@@ -47,14 +49,18 @@ impl BNIRBuilderBytecode  {
 
 impl IRBuilderTrait for BNIRBuilderBytecode {
     type Elem = u8;
+
+    #[inline]
     fn new() -> Self {
         let mut inst = PackedEnumInstructions::new();
-        let sentinal = Instruction::Sentinal;
         inst.internal_mut().reserve_exact(4096);
-        // Sentinal discriminant * max bytes of a single instruction
-        inst.internal_mut().push(sentinal.discriminant());
-        inst.internal_mut().push(sentinal.discriminant());
-        inst.internal_mut().push(sentinal.discriminant());
+        
+        // Set the sentinal offset = largest instruction size
+        let sentinal = Instruction::Sentinal;
+        for _ in 0..SENTINAL_OFFSET {
+            inst.internal_mut().push(sentinal.discriminant());
+        }
+
         return Self { 
             instructions: inst,
             loop_stack: Vec::new(),
@@ -62,6 +68,7 @@ impl IRBuilderTrait for BNIRBuilderBytecode {
         };
     }
 
+    #[inline]
     fn enter_token(&mut self, token: BNToken) -> Result<(), BNError> {
         match token {
             BNToken::Add => self.increment_or_push(Instruction::Add(1)),
@@ -76,14 +83,18 @@ impl IRBuilderTrait for BNIRBuilderBytecode {
                 return Ok(());
             },
             BNToken::EndLoop => {
-                let s_current_idx = self.loop_stack.pop().ok_or(BNError::EndLoopTokenMismatch)?;
-                let sentinal_offset = 1 + size_of::<IValue>() as IValue;
-                let e_idx = self.instructions.internal_ref().len() as IValue - sentinal_offset;
-                // To splice the value of the start loop we need byte index 1 and 2 => loop instruction {d, [v, v]}
-                let data_offset = 1;
-                let s_data_range = (s_current_idx as usize + data_offset)..=(s_current_idx as usize + size_of::<IValue>());
-                self.instructions.internal_mut().splice(s_data_range, e_idx.to_ne_bytes());
-                self.push(Instruction::EndLoop(s_current_idx as IValue - sentinal_offset));
+                // let s_current_idx = self.loop_stack.pop().ok_or(BNError::EndLoopTokenMismatch)?;
+                // let sentinal_offset = 1 + size_of::<IValue>() as IValue;
+                // let e_idx = self.instructions.internal_ref().len() as IValue - sentinal_offset;
+                // // To splice the value of the start loop we need byte index 1 and 2 => loop instruction {d, [v, v]}
+                // let data_offset = 1;
+                // let s_data_range = (s_current_idx + data_offset) as usize ..=(s_current_idx + size_of::<IValue>() as IValue) as usize;
+                // self.instructions.internal_mut().splice(s_data_range, e_idx.to_ne_bytes());
+
+                let e_idx_value = (self.instructions.internal_ref().len() - SENTINAL_OFFSET) as IValue ;
+                let s_idx = self.loop_stack.pop().ok_or(BNError::EndLoopTokenMismatch)?;
+                write_u16_at(self.instructions.internal_mut(), s_idx as usize, e_idx_value);
+                self.push(Instruction::EndLoop(s_idx - SENTINAL_OFFSET as IValue));
                 return Ok(());
             },
             BNToken::None => {
@@ -93,12 +104,13 @@ impl IRBuilderTrait for BNIRBuilderBytecode {
         return Ok(());
     }
 
+    #[inline]
     fn finalize(self) -> Result<Vec<u8>, BNError> {
         if !self.loop_stack.is_empty() {
             return Err(BNError::LoopTokenMismatch);
         }
-        // Skip sentinel bytes (maximum size of an instruction)
-        return Ok(self.instructions.internal().into_iter().skip(3).collect());
+
+        return Ok(self.instructions.internal().into_iter().skip(SENTINAL_OFFSET).collect());
     }
 }
 

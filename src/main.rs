@@ -3,18 +3,30 @@
 fn main()
 {
     use brain_needle::*;
-    use bnemit::BNEmitterFactoryDefault;
-    use bnintermediate::generate_intermediate_representation;
+    // use bnemit::BNEmitterFactoryDefault;
+    // use bnintermediate::generate_intermediate_representation;
     use bncore::create_bnreader;
+    use bnbytecode::bytecode_intermediate::generate_bytecode_intermediate_representation;
+    use bnbytecode::bytecode_emit::BCEmitterFactoryDefault;
 
     let config = build_config();
 
-    let output = generate_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
+    let mut output = generate_bytecode_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
         println!("{err}");
         std::process::exit(1);
     });
 
-    bngen::generate_output::<BNEmitterFactoryDefault>(output, config.context);
+    println!("unshrinked alloc: {} bytes", output.capacity());
+    output.shrink_to_fit();
+    println!("alloc: {} bytes", output.capacity());
+    bnbytecode::bytecode_codegen::bytecode_generate_output::<BCEmitterFactoryDefault>(output, config.context);
+
+    // let output = generate_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
+    //     println!("{err}");
+    //     std::process::exit(1);
+    // });
+
+    // bngen::generate_output::<BNEmitterFactoryDefault>(output, config.context);
 }
 
 fn build_config() -> brain_needle::bnconfig::Config

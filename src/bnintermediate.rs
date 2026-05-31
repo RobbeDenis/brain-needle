@@ -79,6 +79,8 @@ impl BNIRBuilder
 impl IRBuilderTrait for BNIRBuilder
 {
     type Elem = BNNode;
+
+    #[inline]
     fn new() -> Self 
     {
         let mut nodes = Vec::with_capacity(4096);
@@ -89,6 +91,7 @@ impl IRBuilderTrait for BNIRBuilder
         };
     }
 
+    #[inline]
     fn enter_token(&mut self, token: BNToken) -> Result<(), BNError>
     {
         match token {
@@ -117,6 +120,7 @@ impl IRBuilderTrait for BNIRBuilder
         return Ok(());
     }
 
+    #[inline]
     fn finalize(self) -> Result<Vec<BNNode>, BNError>
     {
         if !self.loop_stack.is_empty() {
