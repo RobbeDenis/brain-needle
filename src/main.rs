@@ -11,14 +11,11 @@ fn main()
 
     let config = build_config();
 
-    let mut output = generate_bytecode_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
+    let output = generate_bytecode_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
         println!("{err}");
         std::process::exit(1);
     });
 
-    println!("unshrinked alloc: {} bytes", output.capacity());
-    output.shrink_to_fit();
-    println!("alloc: {} bytes", output.capacity());
     bnbytecode::bytecode_codegen::bytecode_generate_output::<BCEmitterFactoryDefault>(output, config.context);
 
     // let output = generate_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {

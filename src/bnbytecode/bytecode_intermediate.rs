@@ -24,14 +24,10 @@ pub struct BNIRBuilderBytecode {
 impl BNIRBuilderBytecode  {
     #[inline]
     fn increment_or_push(&mut self, temp: Instruction) {
-        // let len_offset = 1;
         let disc_idx = self.instructions.internal_ref().len() - size_of::<IValue>() - 1;
-        // let data_idx = self.instructions.internal_ref().len() - size_of::<IValue>();
+
+        // look into a & b => into match arm
         if self.prev_disc == temp.discriminant() {
-            // let data_range = (data_idx)..=(data_idx + size_of::<IValue>() - len_offset);
-            // let data_value: &mut [u8; size_of::<IValue>()] = self.instructions.internal_mut()[data_range].as_mut_array().unwrap().try_into().unwrap();
-            // // Increment data_value
-            // *data_value = (IValue::from_ne_bytes(*data_value) + 1).to_ne_bytes();
             increment_u16_at(self.instructions.internal_mut(), disc_idx);
         } else {
             self.push(temp);
@@ -43,7 +39,7 @@ impl BNIRBuilderBytecode  {
         self.prev_disc = inst.discriminant();
         // maybe make a push_mut() so we have a ref to the last full instruction which can be used in mutate_or_push() TODO
         // most likely safer then saving last discriminant and reinterpreting the other bytes based on assuming that prev_disc is not wrongly set
-        self.instructions.push(inst); 
+        self.instructions.push(inst);
     }
 }
 
@@ -83,14 +79,6 @@ impl IRBuilderTrait for BNIRBuilderBytecode {
                 return Ok(());
             },
             BNToken::EndLoop => {
-                // let s_current_idx = self.loop_stack.pop().ok_or(BNError::EndLoopTokenMismatch)?;
-                // let sentinal_offset = 1 + size_of::<IValue>() as IValue;
-                // let e_idx = self.instructions.internal_ref().len() as IValue - sentinal_offset;
-                // // To splice the value of the start loop we need byte index 1 and 2 => loop instruction {d, [v, v]}
-                // let data_offset = 1;
-                // let s_data_range = (s_current_idx + data_offset) as usize ..=(s_current_idx + size_of::<IValue>() as IValue) as usize;
-                // self.instructions.internal_mut().splice(s_data_range, e_idx.to_ne_bytes());
-
                 let e_idx_value = (self.instructions.internal_ref().len() - SENTINAL_OFFSET) as IValue ;
                 let s_idx = self.loop_stack.pop().ok_or(BNError::EndLoopTokenMismatch)?;
                 write_u16_at(self.instructions.internal_mut(), s_idx as usize, e_idx_value);
