@@ -77,9 +77,10 @@ impl InstructionPacker for ILeft {
     }
 }
 
+type IndexType = u16;
 pub struct ILoop;
 impl InstructionPacker for ILoop {
-    type IValue = u16;
+    type IValue = IndexType;
     const ID: u8 = 4;
     #[inline(always)]
     fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
@@ -89,7 +90,7 @@ impl InstructionPacker for ILoop {
 
 pub struct IEndLoop;
 impl InstructionPacker for IEndLoop {
-    type IValue = u16;
+    type IValue = IndexType;
     const ID: u8 = 5;
     #[inline(always)]
     fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
@@ -125,21 +126,21 @@ pub struct IndexId<'id> {
 #[derive(Copy, Clone)]
 pub struct TypedIndexId<'id> {
     index: usize,
-    typedId: u8,
+    typed_id: u8,
     _id: Id<'id>,
 }
 
-pub struct ByteStream {
-    ctx: ByteStreamCtx<'static>,
-}
+// pub struct ByteStream {
+//     ctx: ByteStreamCtx<'static>,
+// }
 
-impl ByteStream {
-    fn enter<F, R>(&mut self, f: F) -> R
-        where F: for<'id> FnOnce(&mut ByteStreamCtx<'id>) -> R
-    {
-        f(&mut self.ctx)
-    }
-}
+// impl ByteStream {
+//     fn enter<F, R>(&mut self, f: F) -> R
+//         where F: for<'id> FnOnce(&mut ByteStreamCtx<'id>) -> R
+//     {
+//         f(&mut self.ctx)
+//     }
+// }
 
 pub struct ByteStreamCtx<'id> {
     stream: Vec<u8>,
@@ -159,7 +160,7 @@ impl<'id> ByteStreamCtx<'id> {
         let offset: usize = self.stream.len();
         self.stream.push(IValue::ID);
 
-        return TypedIndexId { index: offset, typedId: IValue::ID, _id: PhantomData }
+        return TypedIndexId { index: offset, typed_id: IValue::ID, _id: PhantomData }
     }
 
     fn alloc_packed<Packer: InstructionPacker>(&mut self, value: Packer::IValue) -> TypedIndexId<'id> {
@@ -167,12 +168,12 @@ impl<'id> ByteStreamCtx<'id> {
         self.stream.push(Packer::ID);
         Packer::pack_value(&mut self.stream, value);
 
-        return TypedIndexId { index: offset, typedId: Packer::ID, _id: PhantomData }
+        return TypedIndexId { index: offset, typed_id: Packer::ID, _id: PhantomData }
     }
 
     fn alloc_or_increment<Packer: InstructionPacker>(&mut self, id: TypedIndexId<'id>) -> TypedIndexId<'id> 
         where Packer::IValue: std::ops::Add<Output = Packer::IValue> + From<u8> {
-        if id.typedId == Packer::ID {
+        if id.typed_id == Packer::ID {
             unsafe {
                 let ptr = self.stream.as_mut_ptr().add(id.index + 1);
                 ptr.cast::<Packer::IValue>().write_unaligned(ptr.cast::<Packer::IValue>().read_unaligned() + Packer::IValue::from(1));
@@ -182,31 +183,29 @@ impl<'id> ByteStreamCtx<'id> {
             let offset: usize = self.stream.len();
             self.stream.push(Packer::ID);
             Packer::pack_value(&mut self.stream, Packer::IValue::from(1));
-            return TypedIndexId { index: offset, typedId: Packer::ID, _id: PhantomData }
+            return TypedIndexId { index: offset, typed_id: Packer::ID, _id: PhantomData }
         }
     }
 
-    fn at(&self, id: IndexId<'id>) -> u8 {
-        self.stream[id.index]
-    }
-
-    fn get_mut(&mut self, id: IndexId<'id>) -> &mut u8 {
-        &mut self.stream[id.index]
+    fn write_value<Packer: InstructionPacker>(&mut self, id: IndexId<'id>, value: Packer::IValue) {
+            unsafe {
+            let ptr = self.stream.as_mut_ptr().add(id.index + 1);
+            ptr.cast::<Packer::IValue>().write_unaligned(value);
+        }
     }
 
     fn index_to_id(&self, index: usize) -> IndexId<'id> {
-        IndexId {
-            index: index,
-            _id: PhantomData,
-        }
+        return IndexId { index: index, _id: PhantomData }
     }
 }
 
 pub struct ByteStreamBuilder {
     ctx: ByteStreamCtx<'static>,
     head: TypedIndexId<'static>,
+    loop_stack: Vec<IndexType>,
 }
 
+const SENTINAL_OFFSET: usize = 3;
 impl IRBuilderTrait for ByteStreamBuilder {
     type Elem = u8;
 
@@ -222,6 +221,7 @@ impl IRBuilderTrait for ByteStreamBuilder {
         return Self { 
             ctx: new_ctx,
             head: new_head,
+            loop_stack: Vec::new(),
         };
     }
 
@@ -231,18 +231,17 @@ impl IRBuilderTrait for ByteStreamBuilder {
             BNToken::Add => { self.head = self.ctx.alloc_or_increment::<IAdd>(self.head); },
             BNToken::Sub => { self.head = self.ctx.alloc_or_increment::<ISub>(self.head); },
             BNToken::Right => { self.head = self.ctx.alloc_or_increment::<IRight>(self.head); },
-            BNToken::Left => { self.head = self.ctx.alloc_or_increment::<ISub>(self.head); },
+            BNToken::Left => { self.head = self.ctx.alloc_or_increment::<ILeft>(self.head); },
             BNToken::In => { self.head = self.ctx.alloc::<IIn>(); },
             BNToken::Out => { self.head = self.ctx.alloc::<IOut>(); },
             BNToken::Loop => {
-                self.head = self.ctx.alloc_packed::<ILoop>(1);
-                // let value: IValue = 32;
-                // self.ctx.alloc_id_slice(&value.to_ne_bytes(), Inst::Loop(0).discriminant());
+                self.head = self.ctx.alloc_packed::<ILoop>(0);
+                self.loop_stack.push(self.head.index as IndexType);
             },
             BNToken::EndLoop => {
-                self.head = self.ctx.alloc_packed::<IEndLoop>(1);
-                // let value: IValue = 64;
-                // self.ctx.alloc_id_slice(&value.to_ne_bytes(), Inst::EndLoop(0).discriminant());
+                let start_index = self.loop_stack.pop().ok_or(BNError::EndLoopTokenMismatch)?;
+                self.head = self.ctx.alloc_packed::<IEndLoop>(start_index - SENTINAL_OFFSET as IndexType);
+                self.ctx.write_value::<ILoop>(self.ctx.index_to_id(start_index as usize), (self.head.index - SENTINAL_OFFSET) as IndexType);
             },
             BNToken::None => { }
         }
@@ -251,34 +250,156 @@ impl IRBuilderTrait for ByteStreamBuilder {
 
     #[inline]
     fn finalize(self) -> Result<Vec<u8>, BNError> {
-        return Ok(self.ctx.stream.into_iter().skip(3).collect());
+        if !self.loop_stack.is_empty() {
+            return Err(BNError::LoopTokenMismatch);
+        }
+
+        return Ok(self.ctx.stream.into_iter().skip(SENTINAL_OFFSET).collect());
     }
 }
 
-mod bnstream_test {
+/////////////////////////////
+///////     TESTS      //////
+/////////////////////////////
+
+#[cfg(test)]
+mod bstream_tests {
     use super::*;
+    use crate::bn_assert_slices_eq;
+    use crate::bn_unwrap;
+    use crate::bn_print_expected_found;
+    use crate::bn_expect_error;
 
     #[test]
-    fn test() {
-        // let mut stream = ByteStream{ ctx: ByteStreamCtx::new() };
+    fn single_token_to_node() {
         let mut builder = ByteStreamBuilder::new();
 
-        builder.enter_token(BNToken::Add).unwrap();
-        builder.enter_token(BNToken::Add).unwrap();
-        builder.enter_token(BNToken::Add).unwrap();
-        builder.enter_token(BNToken::Add).unwrap();
-        builder.enter_token(BNToken::Add).unwrap();
-        builder.enter_token(BNToken::Add).unwrap();
-        builder.enter_token(BNToken::Sub).unwrap();
-        builder.enter_token(BNToken::Right).unwrap();
-        builder.enter_token(BNToken::Left).unwrap();
-        builder.enter_token(BNToken::Loop).unwrap();
-        builder.enter_token(BNToken::EndLoop).unwrap();
-        builder.enter_token(BNToken::In).unwrap();
-        builder.enter_token(BNToken::Out).unwrap();
+        let tokens = [
+            BNToken::None, BNToken::Add,    BNToken::None, BNToken::Sub,
+            BNToken::None, BNToken::Right,  BNToken::None, BNToken::Left,
+            BNToken::None, BNToken::Loop,   BNToken::None, BNToken::EndLoop,
+            BNToken::None, BNToken::In,     BNToken::None, BNToken::Out,
+            BNToken::None,
+        ];
 
-        let stream = builder.finalize().unwrap();
+        for token in tokens {
+            bn_unwrap!(builder.enter_token(token));
+        }
 
-        println!("{:?}", stream);
+        let bytes = bn_unwrap!(builder.finalize());
+        let expected_bytes = vec![
+            0,1,0,      1,1,0,      2,1,0,
+            3,1,0,      4,15,0,     5,12,0,
+            6,          7
+        ];
+        
+        bn_print_expected_found!(expected_bytes, bytes);
+        bn_assert_slices_eq!(expected_bytes, bytes, "byte");
+    }
+
+    #[test]
+    fn collapsed_none_interrupted_tokens() {
+        let mut builder = ByteStreamBuilder::new();
+        let amount = 10;
+        let half_amount = amount / 2;
+        let tokens = [
+            BNToken::Add,   BNToken::Sub,
+            BNToken::Right, BNToken::Left
+        ];
+
+        for token in tokens { 
+            for _ in 0..half_amount {
+                bn_unwrap!(builder.enter_token(token.clone()));
+            } 
+            bn_unwrap!(builder.enter_token(BNToken::None));
+            for _ in 0..half_amount {
+                bn_unwrap!(builder.enter_token(token.clone()));
+        }}
+
+        let bytes = bn_unwrap!(builder.finalize());
+        let expected_bytes = vec![0,amount,0,   1,amount,0,     2,amount,0,     3,amount,0];
+        bn_print_expected_found!(expected_bytes, bytes);
+        bn_assert_slices_eq!(expected_bytes, bytes, "byte");
+    }
+
+    #[test]
+    fn collapsed_interrupted_tokens()
+    {
+        let mut builder = ByteStreamBuilder::new();
+        let amount = 10;
+        let half_amount = amount / 2;
+        let tokens = [
+            BNToken::Add,   BNToken::Sub,
+            BNToken::Right, BNToken::Left
+        ];
+
+        for token in tokens { 
+            for _ in 0..half_amount {
+                bn_unwrap!(builder.enter_token(token.clone()));
+            } 
+            bn_unwrap!(builder.enter_token(BNToken::Loop));
+            for _ in 0..half_amount {
+                bn_unwrap!(builder.enter_token(token.clone()));
+            }
+            bn_unwrap!(builder.enter_token(BNToken::EndLoop));
+        }
+
+        let bytes = bn_unwrap!(builder.finalize());
+        let expected_bytes = vec![
+            0,half_amount,0,    4,9,0,      0,half_amount,0,    5,3,0,
+            1,half_amount,0,    4,21,0,     1,half_amount,0,    5,15,0,
+            2,half_amount,0,    4,33,0,     2,half_amount,0,    5,27,0,
+            3,half_amount,0,    4,45,0,     3,half_amount,0,    5,39,0,
+        ];
+
+        bn_print_expected_found!(expected_bytes, bytes);
+        bn_assert_slices_eq!(expected_bytes, bytes, "byte");
+    }
+
+    #[test]
+    fn bigger_byte_values()
+    {
+        let mut builder = ByteStreamBuilder::new();
+        let amount = u16::MAX;
+        let tokens = [
+            BNToken::Add,   BNToken::Sub,
+            BNToken::Right, BNToken::Left
+        ];
+
+        for token in tokens {
+            for _ in 0..amount {
+                bn_unwrap!(builder.enter_token(token.clone()));
+            }
+        }
+
+        let bytes = bn_unwrap!(builder.finalize());
+        let expected_bytes = vec![
+            0, 0xFF, 0xFF,
+            1, 0xFF, 0xFF,
+            2, 0xFF, 0xFF,
+            3, 0xFF, 0xFF
+        ];
+
+        bn_print_expected_found!(expected_bytes, bytes);
+        bn_assert_slices_eq!(expected_bytes, bytes, "byte");
+    }
+
+    #[test]
+    fn loop_mismatch_error()
+    {
+        let mut builder = ByteStreamBuilder::new();
+        bn_unwrap!(builder.enter_token(BNToken::Loop));
+        bn_unwrap!(builder.enter_token(BNToken::Loop));
+        bn_unwrap!(builder.enter_token(BNToken::EndLoop));
+        bn_expect_error!(builder.finalize(), BNError::LoopTokenMismatch);
+    }
+
+    #[test]
+    fn end_loop_mismatch_error()
+    {
+        let mut builder = ByteStreamBuilder::new();
+        bn_unwrap!(builder.enter_token(BNToken::Loop));
+        bn_unwrap!(builder.enter_token(BNToken::EndLoop));
+        bn_expect_error!(builder.enter_token(BNToken::EndLoop), BNError::EndLoopTokenMismatch);
     }
 }
