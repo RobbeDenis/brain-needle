@@ -4,6 +4,8 @@ use std::vec::Vec;
 use crate::bnintermediate::*;
 use crate::bnerror::BNError;
 
+pub mod bstream_intermediate;
+
 // #[derive(Debug, PartialEq, Clone)]
 // #[repr(u8)]
 // pub enum Inst {
@@ -77,10 +79,9 @@ impl InstructionPacker for ILeft {
     }
 }
 
-type IndexType = u16;
 pub struct ILoop;
 impl InstructionPacker for ILoop {
-    type IValue = IndexType;
+    type IValue = usize;
     const ID: u8 = 4;
     #[inline(always)]
     fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
@@ -90,7 +91,7 @@ impl InstructionPacker for ILoop {
 
 pub struct IEndLoop;
 impl InstructionPacker for IEndLoop {
-    type IValue = IndexType;
+    type IValue = usize;
     const ID: u8 = 5;
     #[inline(always)]
     fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
@@ -156,6 +157,7 @@ impl<'id> ByteStreamCtx<'id> {
         };
     }
 
+    #[inline]
     fn alloc<IValue: Instruction>(&mut self) -> TypedIndexId<'id> {
         let offset: usize = self.stream.len();
         self.stream.push(IValue::ID);
@@ -163,6 +165,7 @@ impl<'id> ByteStreamCtx<'id> {
         return TypedIndexId { index: offset, typed_id: IValue::ID, _id: PhantomData }
     }
 
+    #[inline]
     fn alloc_packed<Packer: InstructionPacker>(&mut self, value: Packer::IValue) -> TypedIndexId<'id> {
         let offset: usize = self.stream.len();
         self.stream.push(Packer::ID);
@@ -171,6 +174,7 @@ impl<'id> ByteStreamCtx<'id> {
         return TypedIndexId { index: offset, typed_id: Packer::ID, _id: PhantomData }
     }
 
+    #[inline]
     fn alloc_or_increment<Packer: InstructionPacker>(&mut self, id: TypedIndexId<'id>) -> TypedIndexId<'id> 
         where Packer::IValue: std::ops::Add<Output = Packer::IValue> + From<u8> {
         if id.typed_id == Packer::ID {
@@ -180,13 +184,11 @@ impl<'id> ByteStreamCtx<'id> {
             }
             return id
         } else {
-            let offset: usize = self.stream.len();
-            self.stream.push(Packer::ID);
-            Packer::pack_value(&mut self.stream, Packer::IValue::from(1));
-            return TypedIndexId { index: offset, typed_id: Packer::ID, _id: PhantomData }
+            return self.alloc_packed::<Packer>(Packer::IValue::from(1))
         }
     }
 
+    #[inline]
     fn write_value<Packer: InstructionPacker>(&mut self, id: IndexId<'id>, value: Packer::IValue) {
             unsafe {
             let ptr = self.stream.as_mut_ptr().add(id.index + 1);
@@ -194,6 +196,7 @@ impl<'id> ByteStreamCtx<'id> {
         }
     }
 
+    #[inline]
     fn index_to_id(&self, index: usize) -> IndexId<'id> {
         return IndexId { index: index, _id: PhantomData }
     }
@@ -202,7 +205,7 @@ impl<'id> ByteStreamCtx<'id> {
 pub struct ByteStreamBuilder {
     ctx: ByteStreamCtx<'static>,
     head: TypedIndexId<'static>,
-    loop_stack: Vec<IndexType>,
+    loop_stack: Vec<usize>,
 }
 
 const SENTINAL_OFFSET: usize = 3;
@@ -236,15 +239,16 @@ impl IRBuilderTrait for ByteStreamBuilder {
             BNToken::Out => { self.head = self.ctx.alloc::<IOut>(); },
             BNToken::Loop => {
                 self.head = self.ctx.alloc_packed::<ILoop>(0);
-                self.loop_stack.push(self.head.index as IndexType);
+                self.loop_stack.push(self.head.index);
             },
             BNToken::EndLoop => {
                 let start_index = self.loop_stack.pop().ok_or(BNError::EndLoopTokenMismatch)?;
-                self.head = self.ctx.alloc_packed::<IEndLoop>(start_index - SENTINAL_OFFSET as IndexType);
-                self.ctx.write_value::<ILoop>(self.ctx.index_to_id(start_index as usize), (self.head.index - SENTINAL_OFFSET) as IndexType);
+                self.head = self.ctx.alloc_packed::<IEndLoop>(start_index - SENTINAL_OFFSET);
+                self.ctx.write_value::<ILoop>(self.ctx.index_to_id(start_index), self.head.index - SENTINAL_OFFSET);
             },
-            BNToken::None => { }
+            BNToken::None => return Ok(())
         }
+
         return Ok(());
     }
 
