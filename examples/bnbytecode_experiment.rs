@@ -1,5 +1,5 @@
 use std::vec::Vec;
-use brain_needle::*;
+use bn::*;
 use bnbytecode::core::{PackedEnumInstructions, Instruction};
 
 fn main() {

@@ -3,7 +3,7 @@ use crate::bnerror::BNError;
 use crate::bstream::ByteStreamBuilder;
 use std::io::Read;
 
-pub fn generate_bytestream_intermediate_representation<R: Read>(reader: R) -> Result<Vec<u8>, BNError> {
+pub fn generate_intermediate<R: Read>(reader: R) -> Result<Vec<u8>, BNError> {
     let mut bytes = reader.bytes().peekable();
     let mut builder = ByteStreamBuilder::new();
 

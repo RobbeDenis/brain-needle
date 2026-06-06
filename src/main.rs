@@ -2,17 +2,17 @@
 
 fn main()
 {
-    use brain_needle::*;
+    use bn::*;
     use bncore::create_bnreader;
 
     let config = build_config();
 
-    // // Bytestream
-    // let output = bstream::bstream_intermediate::generate_bytestream_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
-    //     println!("{err}");
-    //     std::process::exit(1);
-    // });
-    // bstream::bstream_codegen::bytestream_generate_output::<bnbytecode::bytecode_emit::BCEmitterFactoryDefault>(output, config.context);
+    // Bytestream
+    let output = bstream::intermediate::generate_intermediate(create_bnreader(config.file_path)).unwrap_or_else(|err| {
+        println!("{err}");
+        std::process::exit(1);
+    });
+    bstream::codegen::generate_output::<bnbytecode::bytecode_emit::BCEmitterFactoryDefault>(output, config.context);
 
     // // Bytecode
     // let output = bnbytecode::bytecode_intermediate::generate_bytecode_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
@@ -21,15 +21,15 @@ fn main()
     // });
     // bnbytecode::bytecode_codegen::bytecode_generate_output::<bnbytecode::bytecode_emit::BCEmitterFactoryDefault>(output, config.context);
 
-    // Enum
-    let output = bnintermediate::generate_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
-        println!("{err}");
-        std::process::exit(1);
-    });
-    bngen::generate_output::<bnemit::BNEmitterFactoryDefault>(output, config.context);
+    // // Enum
+    // let output = bnintermediate::generate_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
+    //     println!("{err}");
+    //     std::process::exit(1);
+    // });
+    // bngen::generate_output::<bnemit::BNEmitterFactoryDefault>(output, config.context);
 }
 
-fn build_config() -> brain_needle::bnconfig::Config
+fn build_config() -> bn::bnconfig::Config
 {
     #[cfg(feature = "mock-config")]
     return mock_config();
@@ -39,9 +39,9 @@ fn build_config() -> brain_needle::bnconfig::Config
 }
 
 #[allow(unused)]
-fn parsed_config() -> brain_needle::bnconfig::Config
+fn parsed_config() -> bn::bnconfig::Config
 {
-    use brain_needle::bnconfig::*;
+    use bn::bnconfig::*;
 
     let args = Args::parse_from_env();
 
@@ -57,10 +57,10 @@ fn parsed_config() -> brain_needle::bnconfig::Config
 }
 
 #[allow(unused)]
-fn mock_config() -> brain_needle::bnconfig::Config
+fn mock_config() -> bn::bnconfig::Config
 {
-    use brain_needle::bnconfig::Config;
-    use brain_needle::bnctx::*;
+    use bn::bnconfig::Config;
+    use bn::bnctx::*;
 
     let input_path = "bf/wrap_pos.bf".into();
 

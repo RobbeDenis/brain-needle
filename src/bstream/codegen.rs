@@ -2,7 +2,7 @@ use crate::bnctx::TargetContext;
 use crate::bnbytecode::bytecode_emit::BCEmitterFactory;
 use crate::bnbytecode::core::*;
 
-pub fn bytestream_generate_output<TFactory: BCEmitterFactory + Default>(intermediate: Vec<u8>, target_ctx: TargetContext)
+pub fn generate_output<TFactory: BCEmitterFactory + Default>(intermediate: Vec<u8>, target_ctx: TargetContext)
 {
     let mut factory = TFactory::default();
     let mut codegen = factory.create(&target_ctx);

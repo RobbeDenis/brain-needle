@@ -2,7 +2,7 @@
 
 mod case_macros;
 
-pub(crate) use brain_needle::*;
+pub(crate) use bn::*;
 pub(crate) use bnctx::*;
 pub(crate) use bnemit::BNEmitterFactory;
 pub(crate) use bndest::BNDest;

@@ -1,9 +1,7 @@
 use super::utils::*;
 use criterion::*;
 use std::hint::black_box;
-use brain_needle::bnbytecode::bytecode_intermediate::generate_bytecode_intermediate_representation;
-use brain_needle::bnintermediate::generate_intermediate_representation;
-use brain_needle::bstream::bstream_intermediate::generate_bytestream_intermediate_representation;
+use bn::*;
 
 const TIMES_CONTENT: usize = 8;
 
@@ -13,7 +11,7 @@ fn bytecode_ir(c: &mut Criterion) {
                 black_box(std::io::Cursor::new(multiply_contents_into_bytes("bf/big/mandelbrot_extreme.bf", TIMES_CONTENT)))
             },
             |reader| {
-                let _result = generate_bytecode_intermediate_representation(black_box(reader)).unwrap();
+                let _result = bnbytecode::bytecode_intermediate::generate_bytecode_intermediate_representation(black_box(reader)).unwrap();
                 black_box(_result);
             }
         )
@@ -26,7 +24,7 @@ fn enum_vector_ir(c: &mut Criterion) {
                 black_box(std::io::Cursor::new(multiply_contents_into_bytes("bf/big/mandelbrot_extreme.bf", TIMES_CONTENT)))
             },
             |reader| {
-                let _result = generate_intermediate_representation(black_box(reader)).unwrap();
+                let _result = bnintermediate::generate_intermediate_representation(black_box(reader)).unwrap();
                 black_box(_result);
             }
         )
@@ -39,7 +37,7 @@ fn bytestream_ir(c: &mut Criterion) {
                 black_box(std::io::Cursor::new(multiply_contents_into_bytes("bf/big/mandelbrot_extreme.bf", TIMES_CONTENT)))
             },
             |reader| {
-                let _result = generate_bytestream_intermediate_representation(black_box(reader)).unwrap();
+                let _result = bstream::intermediate::generate_intermediate(black_box(reader)).unwrap();
                 black_box(_result);
             }
         )

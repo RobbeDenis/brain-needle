@@ -14,6 +14,7 @@ criterion = "0.8.2"
 mock-config = []
 
 [lib]
+name = "bn"
 bench = false
 
 [[bench]]

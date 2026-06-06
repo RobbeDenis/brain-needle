@@ -5,8 +5,8 @@ use std::ops::{Add, AddAssign};
 use crate::bnintermediate::*;
 use crate::bnerror::BNError;
 
-pub mod bstream_intermediate;
-pub mod bstream_codegen;
+pub mod intermediate;
+pub mod codegen;
 
 // #[derive(Debug, PartialEq, Clone)]
 // #[repr(u8)]
