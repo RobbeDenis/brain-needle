@@ -3,27 +3,30 @@
 fn main()
 {
     use brain_needle::*;
-    // use bnemit::BNEmitterFactoryDefault;
-    // use bnintermediate::generate_intermediate_representation;
     use bncore::create_bnreader;
-    use bnbytecode::bytecode_intermediate::generate_bytecode_intermediate_representation;
-    use bnbytecode::bytecode_emit::BCEmitterFactoryDefault;
 
     let config = build_config();
 
-    let output = generate_bytecode_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
-        println!("{err}");
-        std::process::exit(1);
-    });
-
-    bnbytecode::bytecode_codegen::bytecode_generate_output::<BCEmitterFactoryDefault>(output, config.context);
-
-    // let output = generate_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
+    // // Bytestream
+    // let output = bstream::bstream_intermediate::generate_bytestream_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
     //     println!("{err}");
     //     std::process::exit(1);
     // });
+    // bstream::bstream_codegen::bytestream_generate_output::<bnbytecode::bytecode_emit::BCEmitterFactoryDefault>(output, config.context);
 
-    // bngen::generate_output::<BNEmitterFactoryDefault>(output, config.context);
+    // // Bytecode
+    // let output = bnbytecode::bytecode_intermediate::generate_bytecode_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
+    //     println!("{err}");
+    //     std::process::exit(1);
+    // });
+    // bnbytecode::bytecode_codegen::bytecode_generate_output::<bnbytecode::bytecode_emit::BCEmitterFactoryDefault>(output, config.context);
+
+    // Enum
+    let output = bnintermediate::generate_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
+        println!("{err}");
+        std::process::exit(1);
+    });
+    bngen::generate_output::<bnemit::BNEmitterFactoryDefault>(output, config.context);
 }
 
 fn build_config() -> brain_needle::bnconfig::Config

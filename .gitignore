@@ -5,3 +5,6 @@
 # Ignore all output and big golden files
 /golden/**/output
 /golden/big
+
+# Temp ignore for flamegraph.svg
+*flame*.svg

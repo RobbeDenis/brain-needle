@@ -24,11 +24,13 @@ impl InterpretedEmitter
 
 impl BNEmitter for InterpretedEmitter
 {
+    #[inline]
     fn emit_setup(&mut self)
     {
         self.cells.resize(MAX_PROGRAM_BYTES, 0);
     }
 
+    #[inline]
     fn emit_arithmetic(&mut self, node: &BNNode)
     {
         match node {
@@ -42,6 +44,7 @@ impl BNEmitter for InterpretedEmitter
         }
     }
 
+    #[inline]
     fn emit_shift(&mut self, node: &BNNode)
     {
         match node {
@@ -56,6 +59,7 @@ impl BNEmitter for InterpretedEmitter
         }
     }
 
+    #[inline]
     fn emit_jump(&mut self, node: &BNNode) -> Option<usize>
     {
         match node {
@@ -75,11 +79,13 @@ impl BNEmitter for InterpretedEmitter
         return None;
     }
 
+    #[inline]
     fn emit_out(&mut self)
     {
         self.dest.push(&[self.cells[self.ptr_idx]]);
     }
 
+    #[inline]
     fn emit_in(&mut self)
     {
         let stdin = std::io::stdin().lock();
@@ -87,11 +93,13 @@ impl BNEmitter for InterpretedEmitter
         self.cells[self.ptr_idx] = byte;
     }
 
+    #[inline]
     fn emit_exit(&mut self)
     {
         self.cells = Vec::new();
     }
 
+    #[inline]
     fn finalize(&mut self)
     {
         self.dest.finalize();

@@ -20,5 +20,5 @@ bench = false
 name = "benches_main"
 harness = false
 
-#[profile.bench]
-#debug = true
+[profile.bench]
+debug = true

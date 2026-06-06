@@ -14,19 +14,26 @@ pub fn generate_output<TFactory: BNEmitterFactory + Default>(intermediate: Vec<B
     while i < intermediate.len() {
     let node = &intermediate[i];
         match  *node {
-            BNNode::Add(_) | 
-            BNNode::Sub(_) => codegen.emit_arithmetic(node),
-            BNNode::Right(_) | 
-            BNNode::Left(_) => codegen.emit_shift(node),
-            BNNode::Loop(_) | 
-            BNNode::EndLoop(_) => {
+            BNNode::Add(_) | BNNode::Sub(_) => {
+                codegen.emit_arithmetic(node);
+            },
+            BNNode::Right(_) | BNNode::Left(_) => {
+                codegen.emit_shift(node);
+            },
+            BNNode::Loop(_) | BNNode::EndLoop(_) => {
                 if let Some(target) = codegen.emit_jump(node) {
                     i = target;
                 }
             },
-            BNNode::Out => codegen.emit_out(),
-            BNNode::In => codegen.emit_in(),
-            BNNode::Sentinel => panic!("Sentinel node should not be in final IR")
+            BNNode::Out => {
+                codegen.emit_out();
+            },
+            BNNode::In => {
+                codegen.emit_in();
+            },
+            BNNode::Sentinel => {
+                panic!("Sentinel node should not be in final IR");
+            }
         }
         i += 1;
     }

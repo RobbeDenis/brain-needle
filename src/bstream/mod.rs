@@ -1,10 +1,12 @@
 use std::marker::PhantomData;
 use std::cell::Cell;
 use std::vec::Vec;
+use std::ops::{Add, AddAssign};
 use crate::bnintermediate::*;
 use crate::bnerror::BNError;
 
 pub mod bstream_intermediate;
+pub mod bstream_codegen;
 
 // #[derive(Debug, PartialEq, Clone)]
 // #[repr(u8)]
@@ -81,7 +83,7 @@ impl InstructionPacker for ILeft {
 
 pub struct ILoop;
 impl InstructionPacker for ILoop {
-    type IValue = usize;
+    type IValue = u16;
     const ID: u8 = 4;
     #[inline(always)]
     fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
@@ -91,7 +93,7 @@ impl InstructionPacker for ILoop {
 
 pub struct IEndLoop;
 impl InstructionPacker for IEndLoop {
-    type IValue = usize;
+    type IValue = u16;
     const ID: u8 = 5;
     #[inline(always)]
     fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
@@ -176,11 +178,15 @@ impl<'id> ByteStreamCtx<'id> {
 
     #[inline]
     fn alloc_or_increment<Packer: InstructionPacker>(&mut self, id: TypedIndexId<'id>) -> TypedIndexId<'id> 
-        where Packer::IValue: std::ops::Add<Output = Packer::IValue> + From<u8> {
+        where Packer::IValue: Add<Output = Packer::IValue> + AddAssign<Packer::IValue> + From<u8> {
+        // where Packer::IValue: Add<Output = Packer::IValue> + From<u8> {
         if id.typed_id == Packer::ID {
             unsafe {
-                let ptr = self.stream.as_mut_ptr().add(id.index + 1);
-                ptr.cast::<Packer::IValue>().write_unaligned(ptr.cast::<Packer::IValue>().read_unaligned() + Packer::IValue::from(1));
+                let offset = id.index + 1;
+                let ptr = self.stream.as_mut_ptr().add(offset).cast::<Packer::IValue>();
+                // ptr.write_unaligned(ptr.read_unaligned() + Packer::IValue::from(1));
+                *ptr.as_mut_unchecked() += Packer::IValue::from(1);
+                // *ptr += Packer::IValue::from(1);
             }
             return id
         } else {
@@ -190,9 +196,10 @@ impl<'id> ByteStreamCtx<'id> {
 
     #[inline]
     fn write_value<Packer: InstructionPacker>(&mut self, id: IndexId<'id>, value: Packer::IValue) {
-            unsafe {
-            let ptr = self.stream.as_mut_ptr().add(id.index + 1);
-            ptr.cast::<Packer::IValue>().write_unaligned(value);
+        unsafe {
+            let offset = id.index + 1;
+            let ptr = self.stream.as_mut_ptr().add(offset).cast::<Packer::IValue>();
+            ptr.write_unaligned(value);
         }
     }
 
@@ -215,7 +222,8 @@ impl IRBuilderTrait for ByteStreamBuilder {
     #[inline]
     fn new() -> Self {
         let mut new_ctx = ByteStreamCtx::new();
-        new_ctx.stream.reserve_exact(4096);
+        // new_ctx.stream.reserve_exact(4096);
+        new_ctx.stream.reserve_exact(400000);
 
         let new_head = new_ctx.alloc::<INone>();
         new_ctx.alloc::<INone>();
@@ -243,8 +251,8 @@ impl IRBuilderTrait for ByteStreamBuilder {
             },
             BNToken::EndLoop => {
                 let start_index = self.loop_stack.pop().ok_or(BNError::EndLoopTokenMismatch)?;
-                self.head = self.ctx.alloc_packed::<IEndLoop>(start_index - SENTINAL_OFFSET);
-                self.ctx.write_value::<ILoop>(self.ctx.index_to_id(start_index), self.head.index - SENTINAL_OFFSET);
+                self.head = self.ctx.alloc_packed::<IEndLoop>((start_index - SENTINAL_OFFSET) as <IEndLoop as InstructionPacker>::IValue);
+                self.ctx.write_value::<ILoop>(self.ctx.index_to_id(start_index), (self.head.index - SENTINAL_OFFSET) as <ILoop as InstructionPacker>::IValue);
             },
             BNToken::None => return Ok(())
         }
