@@ -1,12 +1,12 @@
 
 // emitters
-use crate::bnbytecode::bytecode_emit_interpreted::BCInterpretedEmitter;
+use crate::bstream::emit_interpreted::InterpretedEmitter;
 
 use crate::bndest::BNDestFactory;
 use crate::bndest::BNDest;
 use crate::bnctx::{OutputFormat, TargetContext};
 
-pub trait BCEmitter
+pub trait EmitterTrait
 {
     fn emit_setup(&mut self);
     fn emit_add(&mut self, value: u16);
@@ -21,13 +21,13 @@ pub trait BCEmitter
     fn finalize(&mut self);
 }
 
-pub trait BCEmitterFactory
+pub trait EmitterFactory
 {
-    fn create(&mut self, target_ctx: &TargetContext) -> Box<dyn BCEmitter>
+    fn create(&mut self, target_ctx: &TargetContext) -> Box<dyn EmitterTrait>
     {
         return match &target_ctx.format {
-            OutputFormat::Interpreted => Box::new(BCInterpretedEmitter::new(self.create_dest(&target_ctx))),
-            _ => Box::new(BCInterpretedEmitter::new(self.create_dest(&target_ctx)))
+            OutputFormat::Interpreted => Box::new(InterpretedEmitter::new(self.create_dest(&target_ctx))),
+            _ => Box::new(InterpretedEmitter::new(self.create_dest(&target_ctx)))
         }
     }
 
@@ -41,6 +41,6 @@ pub trait BCEmitterFactory
 
 #[derive(Default)]
 pub struct BCEmitterFactoryDefault;
-impl BCEmitterFactory for BCEmitterFactoryDefault
+impl EmitterFactory for BCEmitterFactoryDefault
 {
 }

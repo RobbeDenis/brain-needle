@@ -7,47 +7,35 @@ use crate::bnerror::BNError;
 
 pub mod intermediate;
 pub mod codegen;
-
-// #[derive(Debug, PartialEq, Clone)]
-// #[repr(u8)]
-// pub enum Inst {
-//     Add(u16),
-//     Sub(u16),
-//     Right(u16),
-//     Left(u16),
-//     Loop(u16),
-//     EndLoop(u16),
-//     In,
-//     Out,
-
-//     /*  Used for temporary start instruction
-//         Always keep as last instruction */
-//         Sentinal
-// }
-
-// impl Inst {
-//     #[inline]
-//     pub fn discriminant(&self) -> u8 {
-//         // SAFETY: Because `Self` is marked `repr(u8)`, its layout is a `repr(C)` `union`
-//         // between `repr(C)` structs, each of which has the `u8` discriminant as its first
-//         // field, so we can read the discriminant without offsetting the pointer.
-//         unsafe { *<*const Self>::from(self).cast::<u8>() }
-//     }
-// }
+pub mod emit;
+pub mod emit_interpreted;
 
 pub trait InstructionPacker {
     type IValue;
+    const SIZE: usize;
     const ID: u8;
     fn pack_value(dest: &mut Vec<u8>, value: Self::IValue);
+    fn read(src: &Vec<u8>, index: usize) -> Self::IValue;
 }
 
 pub struct IAdd;
 impl InstructionPacker for IAdd {
     type IValue = u16;
     const ID: u8 = 0;
+    const SIZE: usize = size_of::<Self::IValue>() + 1;
+
     #[inline(always)]
     fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
         dest.extend_from_slice(&value.to_ne_bytes());
+    }
+
+    #[inline(always)]
+    fn read(src: &Vec<u8>, index: usize) -> Self::IValue {
+        unsafe {
+            let data_index = index + 1;
+            let ptr = src.as_ptr().add(data_index).cast::<Self::IValue>();
+            return ptr.read_unaligned();
+        }
     }
 }
 
@@ -55,9 +43,20 @@ pub struct ISub;
 impl InstructionPacker for ISub {
     type IValue = u16;
     const ID: u8 = 1;
+    const SIZE: usize = size_of::<Self::IValue>() + 1;
+
     #[inline(always)]
     fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
         dest.extend_from_slice(&value.to_ne_bytes());
+    }
+
+    #[inline(always)]
+    fn read(src: &Vec<u8>, index: usize) -> Self::IValue {
+        unsafe {
+            let data_index = index + 1;
+            let ptr = src.as_ptr().add(data_index).cast::<Self::IValue>();
+            return ptr.read_unaligned();
+        }
     }
 }
 
@@ -65,9 +64,20 @@ pub struct IRight;
 impl InstructionPacker for IRight {
     type IValue = u16;
     const ID: u8 = 2;
+    const SIZE: usize = size_of::<Self::IValue>() + 1;
+
     #[inline(always)]
     fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
         dest.extend_from_slice(&value.to_ne_bytes());
+    }
+
+    #[inline(always)]
+    fn read(src: &Vec<u8>, index: usize) -> Self::IValue {
+        unsafe {
+            let data_index = index + 1;
+            let ptr = src.as_ptr().add(data_index).cast::<Self::IValue>();
+            return ptr.read_unaligned();
+        }
     }
 }
 
@@ -75,9 +85,20 @@ pub struct ILeft;
 impl InstructionPacker for ILeft {
     type IValue = u16;
     const ID: u8 = 3;
+    const SIZE: usize = size_of::<Self::IValue>() + 1;
+
     #[inline(always)]
     fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
         dest.extend_from_slice(&value.to_ne_bytes());
+    }
+
+    #[inline(always)]
+    fn read(src: &Vec<u8>, index: usize) -> Self::IValue {
+        unsafe {
+            let data_index = index + 1;
+            let ptr = src.as_ptr().add(data_index).cast::<Self::IValue>();
+            return ptr.read_unaligned();
+        }
     }
 }
 
@@ -85,9 +106,20 @@ pub struct ILoop;
 impl InstructionPacker for ILoop {
     type IValue = u16;
     const ID: u8 = 4;
+    const SIZE: usize = size_of::<Self::IValue>() + 1;
+
     #[inline(always)]
     fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
         dest.extend_from_slice(&value.to_ne_bytes());
+    }
+
+    #[inline(always)]
+    fn read(src: &Vec<u8>, index: usize) -> Self::IValue {
+        unsafe {
+            let data_index = index + 1;
+            let ptr = src.as_ptr().add(data_index).cast::<Self::IValue>();
+            return ptr.read_unaligned();
+        }
     }
 }
 
@@ -95,14 +127,26 @@ pub struct IEndLoop;
 impl InstructionPacker for IEndLoop {
     type IValue = u16;
     const ID: u8 = 5;
+    const SIZE: usize = size_of::<Self::IValue>() + 1;
+
     #[inline(always)]
     fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
         dest.extend_from_slice(&value.to_ne_bytes());
+    }
+
+    #[inline(always)]
+    fn read(src: &Vec<u8>, index: usize) -> Self::IValue {
+        unsafe {
+            let data_index = index + 1;
+            let ptr = src.as_ptr().add(data_index).cast::<Self::IValue>();
+            return ptr.read_unaligned();
+        }
     }
 }
 
 pub trait Instruction {
     const ID: u8;
+    const SIZE: usize = 1;
 }
 pub struct IIn;
 impl Instruction for IIn {
@@ -182,11 +226,12 @@ impl<'id> ByteStreamCtx<'id> {
         // where Packer::IValue: Add<Output = Packer::IValue> + From<u8> {
         if id.typed_id == Packer::ID {
             unsafe {
+                // SAFETY: Safety will have to guaranteed by macro codegen
+                // but currently still testing different methods
                 let offset = id.index + 1;
                 let ptr = self.stream.as_mut_ptr().add(offset).cast::<Packer::IValue>();
-                // ptr.write_unaligned(ptr.read_unaligned() + Packer::IValue::from(1));
-                *ptr.as_mut_unchecked() += Packer::IValue::from(1);
-                // *ptr += Packer::IValue::from(1);
+                ptr.write_unaligned(ptr.read_unaligned() + Packer::IValue::from(1));
+                // *ptr.as_mut_unchecked() += Packer::IValue::from(1);
             }
             return id
         } else {
@@ -215,19 +260,20 @@ pub struct ByteStreamBuilder {
     loop_stack: Vec<usize>,
 }
 
-const SENTINAL_OFFSET: usize = 3;
+const SENTINAL_OFFSET: usize = 4;
 impl IRBuilderTrait for ByteStreamBuilder {
     type Elem = u8;
 
     #[inline]
     fn new() -> Self {
         let mut new_ctx = ByteStreamCtx::new();
-        // new_ctx.stream.reserve_exact(4096);
-        new_ctx.stream.reserve_exact(400000);
+        new_ctx.stream.reserve_exact(4096);
+        // new_ctx.stream.reserve_exact(400000);
 
         let new_head = new_ctx.alloc::<INone>();
-        new_ctx.alloc::<INone>();
-        new_ctx.alloc::<INone>();
+        for _ in 1..SENTINAL_OFFSET {
+            new_ctx.alloc::<INone>();
+        }
 
         return Self { 
             ctx: new_ctx,
@@ -265,7 +311,6 @@ impl IRBuilderTrait for ByteStreamBuilder {
         if !self.loop_stack.is_empty() {
             return Err(BNError::LoopTokenMismatch);
         }
-
         return Ok(self.ctx.stream.into_iter().skip(SENTINAL_OFFSET).collect());
     }
 }

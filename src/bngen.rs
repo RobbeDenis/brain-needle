@@ -3,6 +3,7 @@ use crate::bnctx::TargetContext;
 use crate::bnemit::*;
 use crate::bnintermediate::BNNode;
 
+#[inline(never)]
 pub fn generate_output<TFactory: BNEmitterFactory + Default>(intermediate: Vec<BNNode>, target_ctx: TargetContext)
 {
     let mut factory = TFactory::default();

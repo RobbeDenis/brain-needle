@@ -8,7 +8,6 @@ pub mod bndouble_pass_emit;
 pub mod bngen;
 pub mod bnintermediate;
 pub mod bnerror;
-pub mod bnbytecode;
 pub mod bstream;
 
 mod test_macros;

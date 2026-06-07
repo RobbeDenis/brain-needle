@@ -12,14 +12,7 @@ fn main()
         println!("{err}");
         std::process::exit(1);
     });
-    bstream::codegen::generate_output::<bnbytecode::bytecode_emit::BCEmitterFactoryDefault>(output, config.context);
-
-    // // Bytecode
-    // let output = bnbytecode::bytecode_intermediate::generate_bytecode_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
-    //     println!("{err}");
-    //     std::process::exit(1);
-    // });
-    // bnbytecode::bytecode_codegen::bytecode_generate_output::<bnbytecode::bytecode_emit::BCEmitterFactoryDefault>(output, config.context);
+    bstream::codegen::generate_output::<bstream::emit::BCEmitterFactoryDefault>(output, config.context);
 
     // // Enum
     // let output = bnintermediate::generate_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {

@@ -1,8 +1,9 @@
 use crate::bnctx::TargetContext;
-use crate::bnbytecode::bytecode_emit::BCEmitterFactory;
-use crate::bnbytecode::core::*;
+use crate::bstream::emit::EmitterFactory;
+use crate::bstream::*;
 
-pub fn generate_output<TFactory: BCEmitterFactory + Default>(intermediate: Vec<u8>, target_ctx: TargetContext)
+#[inline(never)]
+pub fn generate_output<TFactory: EmitterFactory + Default>(intermediate: Vec<u8>, target_ctx: TargetContext)
 {
     let mut factory = TFactory::default();
     let mut codegen = factory.create(&target_ctx);
@@ -11,19 +12,26 @@ pub fn generate_output<TFactory: BCEmitterFactory + Default>(intermediate: Vec<u
     
     let mut i: usize = 0;
     while i < intermediate.len() {
-        match intermediate[i] {
-            0 => { codegen.emit_add(read_u16_at(&intermediate, i)); i += size_of::<IValue>() + 1; }
-            1 => { codegen.emit_sub(read_u16_at(&intermediate, i)); i += size_of::<IValue>() + 1; }
-            2 => { codegen.emit_right(read_u16_at(&intermediate, i)); i += size_of::<IValue>() + 1; }
-            3 => { codegen.emit_left(read_u16_at(&intermediate, i)); i += size_of::<IValue>() + 1; }
-            4 => {
-                i = codegen.emit_loop(read_u16_at(&intermediate, i)).unwrap_or(i + size_of::<IValue>() + 1);
+        let id = intermediate[i];
+        match id {
+            IAdd::ID => { codegen.emit_add(IAdd::read(&intermediate, i)); i += IAdd::SIZE; }
+            ISub::ID => { codegen.emit_sub(ISub::read(&intermediate, i)); i += ISub::SIZE; }
+            IRight::ID => { codegen.emit_right(IRight::read(&intermediate, i)); i += IRight::SIZE; }
+            ILeft::ID => { codegen.emit_left(ILeft::read(&intermediate, i)); i += ILeft::SIZE; }
+            ILoop::ID => {
+                if let Some(target) = codegen.emit_loop(ILoop::read(&intermediate, i)) {
+                    i = target;
+                }
+                i += ILoop::SIZE;
             }
-            5 => {
-                i = codegen.emit_end_loop(read_u16_at(&intermediate, i)).unwrap_or(i + size_of::<IValue>() + 1);
+            IEndLoop::ID => {
+                if let Some(target) = codegen.emit_end_loop(IEndLoop::read(&intermediate, i)) {
+                    i = target;
+                }
+                i += IEndLoop::SIZE;
             }
-            6 => { codegen.emit_in(); i += 1; }
-            7 => { codegen.emit_out(); i += 1; }
+            IIn::ID => { codegen.emit_in(); i += IIn::SIZE; }
+            IOut::ID => { codegen.emit_out(); i += IOut::SIZE; }
             // SAFETY: JUST A TEST
             // compiler hint so we can messuare the speed when match translates to a dispatch table
             _ => unsafe { std::hint::unreachable_unchecked() }

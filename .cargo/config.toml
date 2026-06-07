@@ -6,12 +6,10 @@ testp = "test -- --nocapture --test-threads=1"
 itest = "test --test itest*"
 itestp = "test --test itest* -- --nocapture --test-threads=1"
 
-runbc = "run --example bnbytecode_experiment"
-
 # ONLY ENABLE FOR COMPARE BENCH MARKS
 # DONT USE FOR RELEASE BUILD
-[target.x86_64-pc-windows-msvc]
-rustflags = [
-    "-C", "llvm-args=-align-all-functions=64",
-    "-C", "llvm-args=-align-all-blocks=64",
-]
+#[target.x86_64-pc-windows-msvc]
+#rustflags = [
+#    "-C", "llvm-args=-align-all-functions=64",
+#    "-C", "llvm-args=-align-all-blocks=64",
+#]

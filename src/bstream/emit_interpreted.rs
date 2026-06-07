@@ -3,25 +3,25 @@ use std::io::Read;
 
 use crate::bncore::MAX_PROGRAM_BYTES;
 use crate::bncore::BYTE_CEIL_WRAP_U8;
-use crate::bnbytecode::bytecode_emit::BCEmitter;
+use crate::bstream::emit::EmitterTrait;
 use crate::bndest::BNDest;
 
-pub struct BCInterpretedEmitter
+pub struct InterpretedEmitter
 {
     dest: Box<dyn BNDest>,
     cells: Vec<u8>,
     ptr_idx: usize
 }
 
-impl BCInterpretedEmitter
+impl InterpretedEmitter
 {
-    pub const fn new(dest: Box<dyn BNDest>) -> BCInterpretedEmitter
+    pub const fn new(dest: Box<dyn BNDest>) -> InterpretedEmitter
     {
-        return BCInterpretedEmitter{ dest: dest, cells: Vec::new(), ptr_idx: 0 };
+        return InterpretedEmitter{ dest: dest, cells: Vec::new(), ptr_idx: 0 };
     }
 }
 
-impl BCEmitter for BCInterpretedEmitter
+impl EmitterTrait for InterpretedEmitter
 {
     #[inline]
     fn emit_setup(&mut self)
