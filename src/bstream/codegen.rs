@@ -16,18 +16,18 @@ pub fn generate_output<TFactory: EmitterFactory + Default>(intermediate: Vec<u8>
     while i < intermediate.len() {
         let id = intermediate[i];
         match id {
-            IAdd::ID => { codegen.emit_add(IAdd::read(&intermediate, i)); i += IAdd::SIZE; }
-            ISub::ID => { codegen.emit_sub(ISub::read(&intermediate, i)); i += ISub::SIZE; }
-            IRight::ID => { codegen.emit_right(IRight::read(&intermediate, i)); i += IRight::SIZE; }
-            ILeft::ID => { codegen.emit_left(ILeft::read(&intermediate, i)); i += ILeft::SIZE; }
+            IAdd::ID => { codegen.emit_add(IAdd::read_payload(&intermediate, i)); i += IAdd::SIZE; }
+            ISub::ID => { codegen.emit_sub(ISub::read_payload(&intermediate, i)); i += ISub::SIZE; }
+            IRight::ID => { codegen.emit_right(IRight::read_payload(&intermediate, i)); i += IRight::SIZE; }
+            ILeft::ID => { codegen.emit_left(ILeft::read_payload(&intermediate, i)); i += ILeft::SIZE; }
             ILoop::ID => {
-                if let Some(target) = codegen.emit_loop(ILoop::read(&intermediate, i)) {
+                if let Some(target) = codegen.emit_loop(ILoop::read_payload(&intermediate, i)) {
                     i = target;
                 }
                 i += ILoop::SIZE;
             }
             IEndLoop::ID => {
-                if let Some(target) = codegen.emit_end_loop(IEndLoop::read(&intermediate, i)) {
+                if let Some(target) = codegen.emit_end_loop(IEndLoop::read_payload(&intermediate, i)) {
                     i = target;
                 }
                 i += IEndLoop::SIZE;

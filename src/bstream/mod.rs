@@ -10,157 +10,112 @@ pub mod codegen;
 pub mod emit;
 pub mod emit_interpreted;
 
-pub trait InstructionPacker {
-    type IValue;
-    const SIZE: usize;
+pub trait Instruction {
     const ID: u8;
-    fn pack_value(dest: &mut Vec<u8>, value: Self::IValue);
-    fn read(src: &Vec<u8>, index: usize) -> Self::IValue;
+}
+
+pub trait IConst: Instruction {
+    const SIZE: usize = 1;
+
+    #[inline(always)]
+    fn alloc(dest: &mut Vec<u8>) {
+        dest.push(Self::ID);
+    }
+}
+
+pub trait IPacked: Instruction {
+    type Payload: Sized + Copy;
+    const PAYLOAD_OFFSET: usize = align_of::<Self::Payload>();
+    const SIZE: usize = Self::PAYLOAD_OFFSET + size_of::<Self::Payload>();
+    
+    #[inline(always)]
+    fn alloc(dest: &mut Vec<u8>, payload: Self::Payload) {
+        dest.push(Self::ID);
+        dest.extend(std::iter::repeat_n(0, Self::PAYLOAD_OFFSET - size_of::<u8>()));
+
+        let bytes = unsafe {
+            std::slice::from_raw_parts(
+                    &payload as *const Self::Payload as *const u8,
+                    size_of::<Self::Payload>())
+        };
+        dest.extend_from_slice(bytes);
+    }
+
+    #[inline(always)]
+    fn read_payload(src: &Vec<u8>, index: usize) -> Self::Payload {
+        let payload_index = index + Self::PAYLOAD_OFFSET;
+        unsafe {
+            let ptr = src.as_ptr().add(payload_index).cast::<Self::Payload>();
+            return ptr.read();
+        }
+    }
 }
 
 pub struct IAdd;
-impl InstructionPacker for IAdd {
-    type IValue = u16;
+impl Instruction for IAdd {
     const ID: u8 = 0;
-    const SIZE: usize = size_of::<Self::IValue>() + 1;
-
-    #[inline(always)]
-    fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
-        dest.extend_from_slice(&value.to_ne_bytes());
-    }
-
-    #[inline(always)]
-    fn read(src: &Vec<u8>, index: usize) -> Self::IValue {
-        unsafe {
-            let data_index = index + 1;
-            let ptr = src.as_ptr().add(data_index).cast::<Self::IValue>();
-            return ptr.read_unaligned();
-        }
-    }
+}
+impl IPacked for IAdd {
+    type Payload = u16; 
 }
 
 pub struct ISub;
-impl InstructionPacker for ISub {
-    type IValue = u16;
+impl Instruction for ISub {
     const ID: u8 = 1;
-    const SIZE: usize = size_of::<Self::IValue>() + 1;
-
-    #[inline(always)]
-    fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
-        dest.extend_from_slice(&value.to_ne_bytes());
-    }
-
-    #[inline(always)]
-    fn read(src: &Vec<u8>, index: usize) -> Self::IValue {
-        unsafe {
-            let data_index = index + 1;
-            let ptr = src.as_ptr().add(data_index).cast::<Self::IValue>();
-            return ptr.read_unaligned();
-        }
-    }
+}
+impl IPacked for ISub {
+    type Payload = u16; 
 }
 
 pub struct IRight;
-impl InstructionPacker for IRight {
-    type IValue = u16;
+impl Instruction for IRight {
     const ID: u8 = 2;
-    const SIZE: usize = size_of::<Self::IValue>() + 1;
-
-    #[inline(always)]
-    fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
-        dest.extend_from_slice(&value.to_ne_bytes());
-    }
-
-    #[inline(always)]
-    fn read(src: &Vec<u8>, index: usize) -> Self::IValue {
-        unsafe {
-            let data_index = index + 1;
-            let ptr = src.as_ptr().add(data_index).cast::<Self::IValue>();
-            return ptr.read_unaligned();
-        }
-    }
+}
+impl IPacked for IRight {
+    type Payload = u16; 
 }
 
 pub struct ILeft;
-impl InstructionPacker for ILeft {
-    type IValue = u16;
+impl Instruction for ILeft {
     const ID: u8 = 3;
-    const SIZE: usize = size_of::<Self::IValue>() + 1;
-
-    #[inline(always)]
-    fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
-        dest.extend_from_slice(&value.to_ne_bytes());
-    }
-
-    #[inline(always)]
-    fn read(src: &Vec<u8>, index: usize) -> Self::IValue {
-        unsafe {
-            let data_index = index + 1;
-            let ptr = src.as_ptr().add(data_index).cast::<Self::IValue>();
-            return ptr.read_unaligned();
-        }
-    }
+}
+impl IPacked for ILeft {
+    type Payload = u16; 
 }
 
 pub struct ILoop;
-impl InstructionPacker for ILoop {
-    type IValue = u16;
+impl Instruction for ILoop {
     const ID: u8 = 4;
-    const SIZE: usize = size_of::<Self::IValue>() + 1;
-
-    #[inline(always)]
-    fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
-        dest.extend_from_slice(&value.to_ne_bytes());
-    }
-
-    #[inline(always)]
-    fn read(src: &Vec<u8>, index: usize) -> Self::IValue {
-        unsafe {
-            let data_index = index + 1;
-            let ptr = src.as_ptr().add(data_index).cast::<Self::IValue>();
-            return ptr.read_unaligned();
-        }
-    }
+}
+impl IPacked for ILoop {
+    type Payload = u16; 
 }
 
 pub struct IEndLoop;
-impl InstructionPacker for IEndLoop {
-    type IValue = u16;
+impl Instruction for IEndLoop {
     const ID: u8 = 5;
-    const SIZE: usize = size_of::<Self::IValue>() + 1;
-
-    #[inline(always)]
-    fn pack_value(dest: &mut Vec<u8>, value: Self::IValue) {
-        dest.extend_from_slice(&value.to_ne_bytes());
-    }
-
-    #[inline(always)]
-    fn read(src: &Vec<u8>, index: usize) -> Self::IValue {
-        unsafe {
-            let data_index = index + 1;
-            let ptr = src.as_ptr().add(data_index).cast::<Self::IValue>();
-            return ptr.read_unaligned();
-        }
-    }
+}
+impl IPacked for IEndLoop {
+    type Payload = u16; 
 }
 
-pub trait Instruction {
-    const ID: u8;
-    const SIZE: usize = 1;
-}
 pub struct IIn;
 impl Instruction for IIn {
     const ID: u8 = 6;
 }
+impl IConst for IIn {}
+
 pub struct IOut;
 impl Instruction for IOut {
     const ID: u8 = 7;
 }
+impl IConst for IOut {}
 
 pub struct INone;
 impl Instruction for INone {
     const ID: u8 = 8;
 }
+impl IConst for INone {}
 
 type Id<'id> = PhantomData<Cell<&'id ()>>;
 
@@ -204,47 +159,46 @@ impl<'id> ByteStreamCtx<'id> {
     }
 
     #[inline]
-    fn alloc<IValue: Instruction>(&mut self) -> TypedIndexId<'id> {
+    fn alloc<I: IConst>(&mut self) -> TypedIndexId<'id> {
         let offset: usize = self.stream.len();
-        self.stream.push(IValue::ID);
+        I::alloc(&mut self.stream);
 
-        return TypedIndexId { index: offset, typed_id: IValue::ID, _id: PhantomData }
+        return TypedIndexId { index: offset, typed_id: I::ID, _id: PhantomData }
     }
 
     #[inline]
-    fn alloc_packed<Packer: InstructionPacker>(&mut self, value: Packer::IValue) -> TypedIndexId<'id> {
+    fn alloc_packed<I: IPacked>(&mut self, payload: I::Payload) -> TypedIndexId<'id> {
         let offset: usize = self.stream.len();
-        self.stream.push(Packer::ID);
-        Packer::pack_value(&mut self.stream, value);
+        I::alloc(&mut self.stream, payload);
 
-        return TypedIndexId { index: offset, typed_id: Packer::ID, _id: PhantomData }
+        return TypedIndexId { index: offset, typed_id: I::ID, _id: PhantomData }
     }
 
     #[inline]
-    fn alloc_or_increment<Packer: InstructionPacker>(&mut self, id: TypedIndexId<'id>) -> TypedIndexId<'id> 
-        where Packer::IValue: Add<Output = Packer::IValue> + AddAssign<Packer::IValue> + From<u8> {
+    fn alloc_or_increment<I: IPacked>(&mut self, id: TypedIndexId<'id>) -> TypedIndexId<'id> 
+        where I::Payload: Add<Output = I::Payload> + AddAssign<I::Payload> + From<u8> {
         // where Packer::IValue: Add<Output = Packer::IValue> + From<u8> {
-        if id.typed_id == Packer::ID {
+        if id.typed_id == I::ID {
+            let offset = id.index + I::PAYLOAD_OFFSET;
             unsafe {
                 // SAFETY: Safety will have to guaranteed by macro codegen
                 // but currently still testing different methods
-                let offset = id.index + 1;
-                let ptr = self.stream.as_mut_ptr().add(offset).cast::<Packer::IValue>();
-                ptr.write_unaligned(ptr.read_unaligned() + Packer::IValue::from(1));
-                // *ptr.as_mut_unchecked() += Packer::IValue::from(1);
+                let ptr = self.stream.as_mut_ptr().add(offset).cast::<I::Payload>();
+                ptr.write(ptr.read() + I::Payload::from(1));
+                // *ptr.as_mut_unchecked() += I::Payload::from(1);
             }
             return id
         } else {
-            return self.alloc_packed::<Packer>(Packer::IValue::from(1))
+            return self.alloc_packed::<I>(I::Payload::from(1))
         }
     }
 
     #[inline]
-    fn write_value<Packer: InstructionPacker>(&mut self, id: IndexId<'id>, value: Packer::IValue) {
+    fn write_payload<I: IPacked>(&mut self, id: IndexId<'id>, payload: I::Payload) {
+        let offset = id.index + I::PAYLOAD_OFFSET;
         unsafe {
-            let offset = id.index + 1;
-            let ptr = self.stream.as_mut_ptr().add(offset).cast::<Packer::IValue>();
-            ptr.write_unaligned(value);
+            let ptr = self.stream.as_mut_ptr().add(offset).cast::<I::Payload>();
+            ptr.write(payload);
         }
     }
 
@@ -297,8 +251,8 @@ impl IRBuilderTrait for ByteStreamBuilder {
             },
             BNToken::EndLoop => {
                 let start_index = self.loop_stack.pop().ok_or(BNError::EndLoopTokenMismatch)?;
-                self.head = self.ctx.alloc_packed::<IEndLoop>((start_index - SENTINAL_OFFSET) as <IEndLoop as InstructionPacker>::IValue);
-                self.ctx.write_value::<ILoop>(self.ctx.index_to_id(start_index), (self.head.index - SENTINAL_OFFSET) as <ILoop as InstructionPacker>::IValue);
+                self.head = self.ctx.alloc_packed::<IEndLoop>((start_index - SENTINAL_OFFSET) as <IEndLoop as IPacked>::Payload);
+                self.ctx.write_payload::<ILoop>(self.ctx.index_to_id(start_index), (self.head.index - SENTINAL_OFFSET) as <ILoop as IPacked>::Payload);
             },
             BNToken::None => return Ok(())
         }
