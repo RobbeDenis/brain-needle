@@ -26,7 +26,7 @@ fn bytestream_ir(c: &mut Criterion) {
                 black_box(std::io::Cursor::new(multiply_contents_into_bytes("bf/big/mandelbrot_extreme.bf", TIMES_CONTENT)))
             },
             |reader| {
-                let _result = bstream::intermediate::generate_intermediate(black_box(reader)).unwrap();
+                let _result = istream::intermediate::generate_intermediate(black_box(reader)).unwrap();
                 black_box(_result);
             }
         )

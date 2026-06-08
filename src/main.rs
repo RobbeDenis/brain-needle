@@ -8,11 +8,11 @@ fn main()
     let config = build_config();
 
     // Bytestream
-    let output = bstream::intermediate::generate_intermediate(create_bnreader(config.file_path)).unwrap_or_else(|err| {
+    let output = istream::intermediate::generate_intermediate(create_bnreader(config.file_path)).unwrap_or_else(|err| {
         println!("{err}");
         std::process::exit(1);
     });
-    bstream::codegen::generate_output::<bstream::emit::BCEmitterFactoryDefault>(output, config.context);
+    istream::codegen::generate_output::<istream::emit::BCEmitterFactoryDefault>(output, config.context);
 
     // // Enum
     // let output = bnintermediate::generate_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {

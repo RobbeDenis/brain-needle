@@ -3,7 +3,7 @@ use std::io::Read;
 
 use crate::bncore::MAX_PROGRAM_BYTES;
 use crate::bncore::BYTE_CEIL_WRAP_U8;
-use crate::bstream::emit::EmitterTrait;
+use crate::istream::emit::EmitterTrait;
 use crate::bndest::BNDest;
 
 pub struct InterpretedEmitter

@@ -1,6 +1,6 @@
 
 // emitters
-use crate::bstream::emit_interpreted::InterpretedEmitter;
+use crate::istream::emit_interpreted::InterpretedEmitter;
 
 use crate::bndest::BNDestFactory;
 use crate::bndest::BNDest;
