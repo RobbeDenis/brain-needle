@@ -112,9 +112,9 @@ mod bstream_tests {
 
         let bytes = bn_unwrap!(builder.finalize());
         let expected_bytes = vec![
-            0,1,0,      1,1,0,      2,1,0,
-            3,1,0,      4,15,0,     5,12,0,
-            6,          7
+            0,0,1,0,      1,0,1,0,      2,0,1,0,
+            3,0,1,0,      4,0,20,0,     5,0,16,0,
+            6,            7
         ];
         
         bn_print_expected_found!(expected_bytes, bytes);
@@ -141,7 +141,7 @@ mod bstream_tests {
         }}
 
         let bytes = bn_unwrap!(builder.finalize());
-        let expected_bytes = vec![0,amount,0,   1,amount,0,     2,amount,0,     3,amount,0];
+        let expected_bytes = vec![0,0,amount,0,   1,0,amount,0,     2,0,amount,0,     3,0,amount,0];
         bn_print_expected_found!(expected_bytes, bytes);
         bn_assert_slices_eq!(expected_bytes, bytes, "byte");
     }
@@ -170,10 +170,10 @@ mod bstream_tests {
 
         let bytes = bn_unwrap!(builder.finalize());
         let expected_bytes = vec![
-            0,half_amount,0,    4,9,0,      0,half_amount,0,    5,3,0,
-            1,half_amount,0,    4,21,0,     1,half_amount,0,    5,15,0,
-            2,half_amount,0,    4,33,0,     2,half_amount,0,    5,27,0,
-            3,half_amount,0,    4,45,0,     3,half_amount,0,    5,39,0,
+            0,0,half_amount,0,    4,0,12,0,      0,0,half_amount,0,    5,0,4,0,
+            1,0,half_amount,0,    4,0,28,0,     1,0,half_amount,0,    5,0,20,0,
+            2,0,half_amount,0,    4,0,44,0,     2,0,half_amount,0,    5,0,36,0,
+            3,0,half_amount,0,    4,0,60,0,     3,0,half_amount,0,    5,0,52,0,
         ];
 
         bn_print_expected_found!(expected_bytes, bytes);
@@ -198,10 +198,10 @@ mod bstream_tests {
 
         let bytes = bn_unwrap!(builder.finalize());
         let expected_bytes = vec![
-            0, 0xFF, 0xFF,
-            1, 0xFF, 0xFF,
-            2, 0xFF, 0xFF,
-            3, 0xFF, 0xFF
+            0, 0, 0xFF, 0xFF,
+            1, 0, 0xFF, 0xFF,
+            2, 0, 0xFF, 0xFF,
+            3, 0, 0xFF, 0xFF
         ];
 
         bn_print_expected_found!(expected_bytes, bytes);
