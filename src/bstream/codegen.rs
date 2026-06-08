@@ -1,12 +1,14 @@
 use crate::bnctx::TargetContext;
 use crate::bstream::emit::EmitterFactory;
+use crate::bstream::emit::EmitterTrait;
 use crate::bstream::*;
 
 #[inline(never)]
 pub fn generate_output<TFactory: EmitterFactory + Default>(intermediate: Vec<u8>, target_ctx: TargetContext)
 {
-    let mut factory = TFactory::default();
-    let mut codegen = factory.create(&target_ctx);
+    // let mut factory = TFactory::default();
+    // let mut codegen = factory.create(&target_ctx);
+    let mut codegen = crate::bstream::emit_interpreted::InterpretedEmitter::new(crate::bndest::BNDestFactory::create(&target_ctx));
     
     codegen.emit_setup();
     

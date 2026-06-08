@@ -1,13 +1,14 @@
 
 use crate::bnctx::TargetContext;
-use crate::bnemit::*;
+use crate::{bndest, bnemit::*};
 use crate::bnintermediate::BNNode;
 
 #[inline(never)]
 pub fn generate_output<TFactory: BNEmitterFactory + Default>(intermediate: Vec<BNNode>, target_ctx: TargetContext)
 {
-    let mut factory = TFactory::default();
-    let mut codegen = factory.create(&target_ctx);
+    // let mut factory = TFactory::default();
+    // let mut codegen = factory.create(&target_ctx);
+    let mut codegen = emit_interpreted::InterpretedEmitter::new(bndest::BNDestFactory::create(&target_ctx));
     
     codegen.emit_setup();
     
