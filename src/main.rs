@@ -8,18 +8,32 @@ fn main()
     let config = build_config();
 
     // Bytestream
+    // let start = std::time::Instant::now();
     let output = istream::intermediate::generate_intermediate(create_bnreader(config.file_path)).unwrap_or_else(|err| {
         println!("{err}");
         std::process::exit(1);
     });
-    istream::codegen::generate_output::<istream::emit::BCEmitterFactoryDefault>(output, config.context);
+    // let duration = start.elapsed();
+    // println!("IR: {:?}", duration);
 
+    // let start = std::time::Instant::now();
+    istream::codegen::generate_output::<istream::emit::BCEmitterFactoryDefault>(output, config.context);
+    // let duration = start.elapsed();
+    // println!("CG: {:?}", duration);
+    
     // // Enum
+    // let start = std::time::Instant::now();
     // let output = bnintermediate::generate_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
     //     println!("{err}");
     //     std::process::exit(1);
     // });
+    // let duration = start.elapsed();
+    // println!("IR: {:?}", duration);
+    
+    // let start = std::time::Instant::now();
     // bngen::generate_output::<bnemit::BNEmitterFactoryDefault>(output, config.context);
+    // let duration = start.elapsed();
+    // println!("CG: {:?}", duration);
 }
 
 fn build_config() -> bn::bnconfig::Config

@@ -3,6 +3,7 @@ use crate::istream::*;
 use tokenmatcher::*;
 use std::io::Read;
 
+#[inline(never)]
 pub fn generate_intermediate<R: Read>(reader: R) -> Result<Vec<u8>, BNError> {
     let mut bytes = reader.bytes().peekable();
     let mut builder = IRStreamBuilder::new();
@@ -87,7 +88,7 @@ impl IRBuilderTrait for IRStreamBuilder {
 /////////////////////////////
 
 #[cfg(test)]
-mod bstream_tests {
+mod istream_tests {
     use super::*;
     use crate::bn_assert_slices_eq;
     use crate::bn_unwrap;

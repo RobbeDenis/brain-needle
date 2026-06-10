@@ -143,6 +143,7 @@ pub struct TypedIndexId<'id> {
 //     }
 // }
 
+const CACHE_LINE_SIZE: usize = 64;
 pub struct IStreamCtx<'id> {
     stream: Vec<u8>,
     _id: Id<'id>,
@@ -158,6 +159,15 @@ impl<'id> IStreamCtx<'id> {
     }
 
     #[inline]
+    fn handle_cache_line_padding<I: IPacked>(&mut self) {
+        let next_len = I::SIZE + self.stream.len();
+        let next_cache_boundary = (next_len / CACHE_LINE_SIZE * CACHE_LINE_SIZE) + CACHE_LINE_SIZE;
+        if next_len > next_cache_boundary {
+            self.stream.extend(std::iter::repeat_n(INone::ID, I::SIZE - (next_len - next_cache_boundary)));
+        }
+    }
+
+    #[inline]
     fn alloc<I: IConst>(&mut self) -> TypedIndexId<'id> {
         let offset: usize = self.stream.len();
         I::alloc(&mut self.stream);
@@ -167,6 +177,7 @@ impl<'id> IStreamCtx<'id> {
 
     #[inline]
     fn alloc_packed<I: IPacked>(&mut self, payload: I::Payload) -> TypedIndexId<'id> {
+        self.handle_cache_line_padding::<I>();
         let offset: usize = self.stream.len();
         I::alloc(&mut self.stream, payload);
 
