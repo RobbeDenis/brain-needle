@@ -34,7 +34,7 @@ pub fn generate_output<TFactory: EmitterFactory + Default>(intermediate: Vec<u8>
             }
             IIn::ID => { codegen.emit_in(); i += IIn::SIZE; }
             IOut::ID => { codegen.emit_out(); i += IOut::SIZE; }
-            INone::ID => { i += INone::SIZE; }
+            IPadding::ID => { i += IPadding::SIZE; }
             // SAFETY: JUST A TEST
             // compiler hint so we can messuare the speed when match translates to a dispatch table
             _ => unsafe { std::hint::unreachable_unchecked() }

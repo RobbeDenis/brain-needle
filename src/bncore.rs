@@ -53,9 +53,18 @@ pub const DEFAULT_OUT_DIR: &str = "output";
 #[allow(unused)]
 pub const DEFAULT_OUT_FILE: &str = "hello.asm";
 
+#[allow(unused)]
 #[inline]
 #[must_use = "The reader must be consumed"]
 pub fn create_bnreader<P: AsRef<std::path::Path>>(path: P) -> std::io::BufReader<std::fs::File> {
     let file = std::fs::File::open(path).unwrap();
     std::io::BufReader::new(file)
 }// TODO create as a type???
+
+#[allow(unused)]
+#[inline]
+#[must_use]
+pub fn build_config_from(path: &str, ctx: crate::bnctx::TargetContext) -> crate::bnconfig::Config
+{
+    crate::bnconfig::Config{ file_path: path.into(), context: ctx }
+}

@@ -110,11 +110,11 @@ impl Instruction for IOut {
 }
 impl IConst for IOut {}
 
-pub struct INone;
-impl Instruction for INone {
+pub struct IPadding;
+impl Instruction for IPadding {
     const ID: u8 = 8;
 }
-impl IConst for INone {}
+impl IConst for IPadding {}
 
 type Id<'id> = PhantomData<Cell<&'id ()>>;
 
@@ -143,6 +143,7 @@ pub struct TypedIndexId<'id> {
 //     }
 // }
 
+const TEMP_SENTINAL_OFFSET: usize = 4;
 const CACHE_LINE_SIZE: usize = 64;
 pub struct IStreamCtx<'id> {
     stream: Vec<u8>,
@@ -160,10 +161,11 @@ impl<'id> IStreamCtx<'id> {
 
     #[inline]
     fn handle_cache_line_padding<I: IPacked>(&mut self) {
-        let next_len = I::SIZE + self.stream.len();
-        let next_cache_boundary = (next_len / CACHE_LINE_SIZE * CACHE_LINE_SIZE) + CACHE_LINE_SIZE;
-        if next_len > next_cache_boundary {
-            self.stream.extend(std::iter::repeat_n(INone::ID, I::SIZE - (next_len - next_cache_boundary)));
+        let len = self.stream.len() - TEMP_SENTINAL_OFFSET;
+        let next_len = I::SIZE + len;
+        let cache_boundary = (len / CACHE_LINE_SIZE * CACHE_LINE_SIZE) + CACHE_LINE_SIZE;
+        if next_len > cache_boundary {
+            self.stream.extend(std::iter::repeat_n(IPadding::ID, I::SIZE + cache_boundary - next_len));
         }
     }
 
@@ -177,7 +179,7 @@ impl<'id> IStreamCtx<'id> {
 
     #[inline]
     fn alloc_packed<I: IPacked>(&mut self, payload: I::Payload) -> TypedIndexId<'id> {
-        self.handle_cache_line_padding::<I>();
+        // self.handle_cache_line_padding::<I>();
         let offset: usize = self.stream.len();
         I::alloc(&mut self.stream, payload);
 

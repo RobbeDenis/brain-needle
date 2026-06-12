@@ -71,17 +71,17 @@ macro_rules! bn_assert_slices_eq {
     ($expected:expr, $found:expr, $ctx_hint:expr, $header:expr) => {{
         let exp_slice: &[_] = &$expected;
         let fnd_slice: &[_] = &$found;
+        let hint: Option<&str> = $ctx_hint;
+        let hint = match hint {
+            Some(v) => format!("{} ", v),
+            None => String::new(),
+        };
 
-        $crate::bn_assert_eq!(exp_slice.len(), fnd_slice.len(), "len");
+        $crate::bn_assert_eq!(exp_slice.len(), fnd_slice.len(), &*format!("{}len", hint));
 
         for (i, (exp, fnd)) in exp_slice.iter().zip(fnd_slice.iter()).enumerate() {
             if exp != fnd {
                 use ansi_term::Color::{Green, Red, Yellow};
-                let hint: Option<&str> = $ctx_hint;
-                let hint = match hint {
-                    Some(v) => format!("{} ", v),
-                    None => String::new(),
-                };
                 panic!(
                     "\nAssert slice equal failed at {}:{}:\n{}\n{}at {}{} : {:?}\n{}at {}{} : {:?}\n",
                     file!(), line!(),

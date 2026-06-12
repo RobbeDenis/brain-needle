@@ -38,9 +38,9 @@ impl IRBuilderTrait for IRStreamBuilder {
         let mut new_ctx = IStreamCtx::new();
         new_ctx.stream.reserve_exact(4096);
 
-        let new_head = new_ctx.alloc::<INone>();
+        let new_head = new_ctx.alloc::<IPadding>();
         for _ in 1..SENTINAL_OFFSET {
-            new_ctx.alloc::<INone>();
+            new_ctx.alloc::<IPadding>();
         }
 
         return Self { 
@@ -94,6 +94,7 @@ mod istream_tests {
     use crate::bn_unwrap;
     use crate::bn_print_expected_found;
     use crate::bn_expect_error;
+    use crate::bn_assert_eq;
 
     #[test]
     fn single_token_to_node() {
@@ -207,6 +208,49 @@ mod istream_tests {
 
         bn_print_expected_found!(expected_bytes, bytes);
         bn_assert_slices_eq!(expected_bytes, bytes, "byte");
+    }
+
+    #[test]
+    fn cache_line_boundary()
+    {
+        let exp_cl = vec![
+            0, 0, 1, 0
+        ];
+
+        for offset in 0..(IAdd::SIZE as usize) {
+            let insert_at = CACHE_LINE_SIZE - offset;
+            let mut builder = IRStreamBuilder::new();
+            for _ in 0..insert_at {
+                bn_unwrap!(builder.enter_token(BNToken::Out));
+            }
+            bn_unwrap!(builder.enter_token(BNToken::Add));
+            let stream = bn_unwrap!(builder.finalize());
+            let next_cl: Vec<u8> = stream.iter().skip(CACHE_LINE_SIZE).cloned().collect();
+            let padding: Vec<u8> = stream.iter().skip(insert_at).take(offset).copied().collect();
+            let exp_pad = vec![IPadding::ID; offset];
+
+            bn_print_expected_found!(exp_pad, padding);
+            bn_assert_slices_eq!(exp_pad, padding, "padding");
+
+            bn_print_expected_found!(exp_cl, next_cl);
+            bn_assert_slices_eq!(exp_cl, next_cl, "cache line");
+        }
+
+        let offset = IAdd::SIZE as usize;
+        let insert_at = CACHE_LINE_SIZE - offset;
+        let mut builder = IRStreamBuilder::new();
+        for _ in 0..insert_at {
+            bn_unwrap!(builder.enter_token(BNToken::Out));
+        }
+        bn_unwrap!(builder.enter_token(BNToken::Add));
+        let stream = bn_unwrap!(builder.finalize());
+        let next_cl: Vec<u8> = stream.iter().skip(CACHE_LINE_SIZE).cloned().collect();
+        let insert_v: Vec<u8> = stream.iter().skip(insert_at).take(offset).copied().collect();
+
+        bn_print_expected_found!(exp_cl, insert_v);
+        bn_assert_slices_eq!(exp_cl, insert_v);
+
+        bn_assert_eq!(0, next_cl.len(), "len");
     }
 
     #[test]
