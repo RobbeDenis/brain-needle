@@ -6,6 +6,7 @@ default-run = "brain-needle"
 
 [dependencies]
 ansi_term = "0.12.1"
+rand = "0.10.1"
 
 [dev-dependencies]
 criterion = "0.8.2"
@@ -21,5 +22,5 @@ bench = false
 name = "benches_main"
 harness = false
 
-[profile.bench]
-debug = true
+#[profile.bench]
+#debug = true

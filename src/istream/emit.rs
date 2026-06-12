@@ -5,16 +5,17 @@ use crate::istream::emit_interpreted::InterpretedEmitter;
 use crate::bndest::BNDestFactory;
 use crate::bndest::BNDest;
 use crate::bnctx::{OutputFormat, TargetContext};
+use crate::istream::*;
 
 pub trait EmitterTrait
 {
     fn emit_setup(&mut self);
-    fn emit_add(&mut self, value: u16);
-    fn emit_sub(&mut self, value: u16);
-    fn emit_right(&mut self, value: u16);
-    fn emit_left(&mut self, value: u16);
-    fn emit_loop(&mut self, value: u16) -> Option<usize>;
-    fn emit_end_loop(&mut self, value: u16) -> Option<usize>;
+    fn emit_add(&mut self, value: <IAdd as IPacked>::Payload);
+    fn emit_sub(&mut self, value: <ISub as IPacked>::Payload);
+    fn emit_right(&mut self, value: <IRight as IPacked>::Payload);
+    fn emit_left(&mut self, value: <ILeft as IPacked>::Payload);
+    fn emit_loop(&mut self, target: <ILoop as IPacked>::Payload) -> Option<usize>;
+    fn emit_end_loop(&mut self, target: <IEndLoop as IPacked>::Payload) -> Option<usize>;
     fn emit_out(&mut self);
     fn emit_in(&mut self);
     fn emit_exit(&mut self);

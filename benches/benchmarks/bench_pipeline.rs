@@ -6,8 +6,6 @@ use bn::bncore::build_config_from;
 
 #[allow(unused)]
 fn mandelbrot(c: &mut Criterion) {
-    let config = black_box(build_config_from("bf/mandelbrot.bf", std_lin_int_ctx()));
-
     c.bench_function("Mandelbrot Single", |b| {
         b.iter_with_setup(|| {
             black_box(build_config_from("bf/mandelbrot.bf", std_lin_int_ctx()))
@@ -24,8 +22,6 @@ fn mandelbrot(c: &mut Criterion) {
 
 #[allow(unused)]
 fn mandelbrot_enum(c: &mut Criterion) {
-    let config = black_box(build_config_from("bf/mandelbrot.bf", std_lin_int_ctx()));
-
     c.bench_function("Mandelbrot Enum", |b| {
         b.iter_with_setup(|| {
             black_box(build_config_from("bf/mandelbrot.bf", std_lin_int_ctx()))

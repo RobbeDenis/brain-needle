@@ -4,6 +4,8 @@ use std::io::Read;
 use crate::bncore::MAX_PROGRAM_BYTES;
 use crate::bncore::BYTE_CEIL_WRAP_U8;
 use crate::istream::emit::EmitterTrait;
+use crate::istream::*;
+
 use crate::bndest::BNDest;
 
 pub struct InterpretedEmitter
@@ -30,19 +32,19 @@ impl EmitterTrait for InterpretedEmitter
     }
 
     #[inline]
-    fn emit_add(&mut self, value: u16)
+    fn emit_add(&mut self, value: <IAdd as IPacked>::Payload)
     {
         self.cells[self.ptr_idx] = self.cells[self.ptr_idx].wrapping_add(value as u8) % BYTE_CEIL_WRAP_U8;
     }
 
     #[inline]
-    fn emit_sub(&mut self, value: u16)
+    fn emit_sub(&mut self, value: <ISub as IPacked>::Payload)
     {
         self.cells[self.ptr_idx] = self.cells[self.ptr_idx].wrapping_sub(value as u8) % BYTE_CEIL_WRAP_U8;
     }
 
     #[inline]
-    fn emit_right(&mut self, value: u16)
+    fn emit_right(&mut self, value: <IRight as IPacked>::Payload)
     {
         self.ptr_idx += value as usize % MAX_PROGRAM_BYTES;
         if self.ptr_idx >= MAX_PROGRAM_BYTES { 
@@ -51,27 +53,27 @@ impl EmitterTrait for InterpretedEmitter
     }
 
     #[inline]
-    fn emit_left(&mut self, value: u16)
+    fn emit_left(&mut self, value: <ILeft as IPacked>::Payload)
     {
         self.ptr_idx = (self.ptr_idx + MAX_PROGRAM_BYTES - (value as usize % MAX_PROGRAM_BYTES)) % MAX_PROGRAM_BYTES;
     }
 
     #[inline]
-    fn emit_loop(&mut self,  value: u16) -> Option<usize>
+    fn emit_loop(&mut self,  target: <ILoop as IPacked>::Payload) -> Option<usize>
     {
         if self.cells[self.ptr_idx] == 0 {
-            return Some(value as usize);
+            return Some(target as usize);
         }
         return None;
     }
 
     #[inline]
-    fn emit_end_loop(&mut self,  value: u16) -> Option<usize>
+    fn emit_end_loop(&mut self,  target: <IEndLoop as IPacked>::Payload) -> Option<usize>
     {
-        if self.cells[self.ptr_idx] != 0 {
-            return Some(value as usize);
+        if self.cells[self.ptr_idx] == 0 {
+            return None;
         }
-        return None;
+        return Some(target as usize);
     }
 
     #[inline]

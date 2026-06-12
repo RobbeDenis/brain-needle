@@ -66,5 +66,5 @@ pub fn create_bnreader<P: AsRef<std::path::Path>>(path: P) -> std::io::BufReader
 #[must_use]
 pub fn build_config_from(path: &str, ctx: crate::bnctx::TargetContext) -> crate::bnconfig::Config
 {
-    crate::bnconfig::Config{ file_path: path.into(), context: ctx }
+    crate::bnconfig::Config{ file_path: std::path::PathBuf::from(path), context: ctx }
 }

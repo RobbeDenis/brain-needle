@@ -19,18 +19,20 @@ pub trait IConst: Instruction {
     #[inline(always)]
     fn alloc(dest: &mut Vec<u8>) {
         dest.push(Self::ID);
+        // dest.extend(std::iter::repeat_n(IPadding::ID, align_of::<usize>() - size_of::<u8>()));
     }
 }
 
 pub trait IPacked: Instruction {
     type Payload: Sized + Copy;
+    // const PAYLOAD_OFFSET: usize = size_of::<u8>();
     const PAYLOAD_OFFSET: usize = align_of::<Self::Payload>();
     const SIZE: usize = Self::PAYLOAD_OFFSET + size_of::<Self::Payload>();
     
     #[inline(always)]
     fn alloc(dest: &mut Vec<u8>, payload: Self::Payload) {
         dest.push(Self::ID);
-        dest.extend(std::iter::repeat_n(0, Self::PAYLOAD_OFFSET - size_of::<u8>()));
+        dest.extend(std::iter::repeat_n(IPadding::ID, Self::PAYLOAD_OFFSET - size_of::<u8>()));
 
         let bytes = unsafe {
             std::slice::from_raw_parts(
@@ -55,7 +57,7 @@ impl Instruction for IAdd {
     const ID: u8 = 0;
 }
 impl IPacked for IAdd {
-    type Payload = u16; 
+    type Payload = usize; 
 }
 
 pub struct ISub;
@@ -63,7 +65,7 @@ impl Instruction for ISub {
     const ID: u8 = 1;
 }
 impl IPacked for ISub {
-    type Payload = u16; 
+    type Payload = usize; 
 }
 
 pub struct IRight;
@@ -71,7 +73,7 @@ impl Instruction for IRight {
     const ID: u8 = 2;
 }
 impl IPacked for IRight {
-    type Payload = u16; 
+    type Payload = usize; 
 }
 
 pub struct ILeft;
@@ -79,7 +81,7 @@ impl Instruction for ILeft {
     const ID: u8 = 3;
 }
 impl IPacked for ILeft {
-    type Payload = u16; 
+    type Payload = usize; 
 }
 
 pub struct ILoop;
@@ -87,7 +89,7 @@ impl Instruction for ILoop {
     const ID: u8 = 4;
 }
 impl IPacked for ILoop {
-    type Payload = u16; 
+    type Payload = usize; 
 }
 
 pub struct IEndLoop;
@@ -95,7 +97,7 @@ impl Instruction for IEndLoop {
     const ID: u8 = 5;
 }
 impl IPacked for IEndLoop {
-    type Payload = u16; 
+    type Payload = usize; 
 }
 
 pub struct IIn;
@@ -143,7 +145,7 @@ pub struct TypedIndexId<'id> {
 //     }
 // }
 
-const TEMP_SENTINAL_OFFSET: usize = 4;
+const TEMP_SENTINAL_OFFSET: usize = 64;
 const CACHE_LINE_SIZE: usize = 64;
 pub struct IStreamCtx<'id> {
     stream: Vec<u8>,
@@ -163,9 +165,10 @@ impl<'id> IStreamCtx<'id> {
     fn handle_cache_line_padding<I: IPacked>(&mut self) {
         let len = self.stream.len() - TEMP_SENTINAL_OFFSET;
         let next_len = I::SIZE + len;
-        let cache_boundary = (len / CACHE_LINE_SIZE * CACHE_LINE_SIZE) + CACHE_LINE_SIZE;
+        // let cache_boundary = (len / CACHE_LINE_SIZE * CACHE_LINE_SIZE) + CACHE_LINE_SIZE;
+        let cache_boundary = (len + CACHE_LINE_SIZE) & !(CACHE_LINE_SIZE - 1);
         if next_len > cache_boundary {
-            self.stream.extend(std::iter::repeat_n(IPadding::ID, I::SIZE + cache_boundary - next_len));
+            self.stream.extend(std::iter::repeat_n(IPadding::ID, cache_boundary - len));
         }
     }
 
@@ -179,7 +182,7 @@ impl<'id> IStreamCtx<'id> {
 
     #[inline]
     fn alloc_packed<I: IPacked>(&mut self, payload: I::Payload) -> TypedIndexId<'id> {
-        // self.handle_cache_line_padding::<I>();
+        self.handle_cache_line_padding::<I>();
         let offset: usize = self.stream.len();
         I::alloc(&mut self.stream, payload);
 

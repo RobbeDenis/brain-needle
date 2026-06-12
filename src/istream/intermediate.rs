@@ -29,7 +29,7 @@ pub struct IRStreamBuilder {
     loop_stack: Vec<usize>,
 }
 
-const SENTINAL_OFFSET: usize = 4;
+const SENTINAL_OFFSET: usize = 64;
 impl IRBuilderTrait for IRStreamBuilder {
     type Elem = u8;
 

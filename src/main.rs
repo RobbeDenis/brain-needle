@@ -22,18 +22,18 @@ fn main()
     // println!("CG: {:?}", duration);
     
     // // Enum
-    // let start = std::time::Instant::now();
+    // // let start = std::time::Instant::now();
     // let output = bnintermediate::generate_intermediate_representation(create_bnreader(config.file_path)).unwrap_or_else(|err| {
     //     println!("{err}");
     //     std::process::exit(1);
     // });
-    // let duration = start.elapsed();
-    // println!("IR: {:?}", duration);
+    // // let duration = start.elapsed();
+    // // println!("IR: {:?}", duration);
     
-    // let start = std::time::Instant::now();
+    // // let start = std::time::Instant::now();
     // bngen::generate_output::<bnemit::BNEmitterFactoryDefault>(output, config.context);
-    // let duration = start.elapsed();
-    // println!("CG: {:?}", duration);
+    // // let duration = start.elapsed();
+    // // println!("CG: {:?}", duration);
 }
 
 fn build_config() -> bn::bnconfig::Config
